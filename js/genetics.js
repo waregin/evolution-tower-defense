@@ -8,7 +8,7 @@ export const TRAITS = {
   hue: {
     label: "Color",
     min: 0, max: 360, wrap: true,
-    mutation: 14,
+    mutation: 14, default: 30,
     unit: "°",
     describe: (v) => `${Math.round(v)}°`,
     blurb: "Body color. Matters when a visual predator can spot prey that stand out from the background.",
@@ -16,15 +16,15 @@ export const TRAITS = {
   speed: {
     label: "Speed",
     min: 0.45, max: 2.3, wrap: false,
-    mutation: 0.11,
+    mutation: 0.11, default: 1.0,
     unit: "×",
     describe: (v) => `${v.toFixed(2)}×`,
-    blurb: "How fast prey move. Fast prey spend less time exposed to predators, but speed trades off against armor.",
+    blurb: "How fast prey move. Fast prey spend less time exposed to predators, but speed trades off against armor and display.",
   },
   armor: {
     label: "Armor",
     min: 0, max: 0.85, wrap: false,
-    mutation: 0.07,
+    mutation: 0.07, default: 0.05,
     unit: "",
     describe: (v) => `${Math.round(v * 100)}%`,
     blurb: "Physical protection against clawed predators. Heavy armor is costly: it slows the prey down.",
@@ -32,10 +32,26 @@ export const TRAITS = {
   toxinResistance: {
     label: "Toxin resist",
     min: 0, max: 0.92, wrap: false,
-    mutation: 0.09,
+    mutation: 0.09, default: 0.05,
     unit: "",
     describe: (v) => `${Math.round(v * 100)}%`,
     blurb: "Resistance to venom. Protects against poison pressures but does nothing against claws or hawks.",
+  },
+  ornament: {
+    label: "Display",
+    min: 0, max: 1, wrap: false,
+    mutation: 0.06, default: 0.04,
+    unit: "",
+    describe: (v) => `${Math.round(v * 100)}%`,
+    blurb: "A showy ornament (bright plume). Wins matings when mates are choosy, but makes prey conspicuous to visual hunters and a touch slower — the handicap.",
+  },
+  preference: {
+    label: "Mate choice",
+    min: 0, max: 1, wrap: false,
+    mutation: 0.06, default: 0.08,
+    unit: "",
+    describe: (v) => `${Math.round(v * 100)}%`,
+    blurb: "How strongly maters prefer showy partners. Has no survival cost, but drags the ornament upward generation after generation (Fisherian runaway).",
   },
 };
 
@@ -73,13 +89,24 @@ function coerce(key, value) {
 }
 
 // Build a fresh genome from a level spec: { trait: {mean, spread} }.
+// Traits the level doesn't mention fall back to the trait's neutral default.
 export function randomGenome(spec) {
   const g = {};
   for (const key of TRAIT_KEYS) {
-    const s = spec[key] || { mean: (TRAITS[key].min + TRAITS[key].max) / 2, spread: 0 };
+    const s = spec[key] || { mean: TRAITS[key].default, spread: 0 };
     g[key] = coerce(key, s.mean + gaussian() * (s.spread || 0));
   }
   return g;
+}
+
+// Weighted random index from an array of non-negative weights.
+export function weightedIndex(weights, total) {
+  let r = Math.random() * total;
+  for (let i = 0; i < weights.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return i;
+  }
+  return weights.length - 1;
 }
 
 // Produce an offspring genome from two parents.
