@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evolution Tower Defense</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header id="topbar">
+    <h1>🧬 Evolution Tower Defense</h1>
+    <div id="level-picker">
+      <label for="level-select">Level:</label>
+      <select id="level-select"></select>
+      <button id="restart-btn" class="btn">↻ Restart</button>
+      <button id="help-btn" class="btn">? How to play</button>
+    </div>
+  </header>
+
+  <main id="game-area">
+    <section id="board-wrap">
+      <canvas id="board" width="800" height="600"></canvas>
+      <div id="board-overlay"></div>
+    </section>
+
+    <aside id="sidebar">
+      <div class="panel" id="goal-panel">
+        <h2 id="level-name">Level</h2>
+        <p id="level-desc" class="muted"></p>
+        <div id="goal-box"></div>
+      </div>
+
+      <div class="panel" id="status-panel">
+        <div class="stat-row">
+          <div class="stat"><span class="stat-label">Generation</span><span id="gen-num" class="stat-val">0</span></div>
+          <div class="stat"><span class="stat-label">Energy</span><span id="energy" class="stat-val">0</span></div>
+          <div class="stat" id="lives-stat"><span class="stat-label">Base</span><span id="lives" class="stat-val">—</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><span class="stat-label">Population</span><span id="pop" class="stat-val">0</span></div>
+          <div class="stat"><span class="stat-label">Through last gen</span><span id="survivors" class="stat-val">—</span></div>
+        </div>
+      </div>
+
+      <div class="panel" id="tower-panel">
+        <h3>Selection pressures</h3>
+        <div id="tower-buttons"></div>
+        <p class="hint" id="tower-hint">Click a pressure, then click an open tile to place it. Right-click a placed pressure to sell.</p>
+      </div>
+
+      <div class="panel" id="action-panel">
+        <button id="start-btn" class="btn big primary">▶ Release next generation</button>
+        <button id="speed-btn" class="btn">⏩ Speed: 1×</button>
+      </div>
+
+      <div class="panel" id="stats-panel">
+        <h3>Population genetics</h3>
+        <div id="trait-charts"></div>
+        <h4>Mean trait over generations</h4>
+        <canvas id="trend-chart" width="320" height="140"></canvas>
+      </div>
+    </aside>
+  </main>
+
+  <div id="tip-toast" class="toast hidden"></div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <button id="modal-close" class="modal-close">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
