@@ -140,14 +140,17 @@ export class UI {
 
     const livesLabel = this.$("lives-stat").querySelector(".stat-label");
     const livesVal = this.$("lives");
+    livesVal.style.color = "";
     if (lvl.mode === "extinction") {
       livesLabel.textContent = "Base";
       livesVal.textContent = g.baseHealth;
       livesVal.style.color = g.baseHealth <= 3 ? "var(--danger)" : "";
+    } else if (g.category === "drift" || g.category === "speciation") {
+      livesLabel.textContent = "Diversity";
+      livesVal.textContent = `${Math.round(g.diversity() * 100)}%`;
     } else {
       livesLabel.textContent = "Need through";
       livesVal.textContent = `≥${lvl.goal.minSurvivors}`;
-      livesVal.style.color = "";
     }
 
     this._renderGoal();
@@ -174,6 +177,7 @@ export class UI {
         <div class="muted" style="margin-top:6px">${lvl.lesson}</div>`;
       return;
     }
+    if (g.category === "drift" || g.category === "speciation") return this._renderMetricGoal();
     const goal = lvl.goal;
     const frac = g.goalProgress();
     const need = goal.winFraction;
@@ -185,6 +189,31 @@ export class UI {
     box.innerHTML = `
       <div><span class="goal-target">Goal:</span> ${intro}</div>
       <div style="margin-top:6px">Population matching target: <b>${pct}%</b> <span class="muted">(need ${Math.round(need * 100)}%)</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${fill}%"></div></div>
+      <div class="muted" style="margin-top:6px">${lvl.lesson}</div>`;
+  }
+
+  // Goal panel for the metric-based modes (drift, speciation).
+  _renderMetricGoal() {
+    const g = this.game, lvl = g.level, box = this.$("goal-box");
+    const fill = Math.round(Math.min(100, g.goalProgress() * 100));
+    const div = Math.round(g.diversity() * 100);
+    let intro, readout;
+    if (g.category === "drift") {
+      if (lvl.goal.kind === "fixation") {
+        intro = "<b>Fix the colour by drift.</b> Nothing selects on colour — only luck. Cull at random to shrink the breeding pool until the whole population shares one colour.";
+        readout = `Colour diversity: <b>${div}%</b> <span class="muted">(win as it nears 0%)</span>`;
+      } else {
+        intro = "<b>Conserve the colour diversity.</b> Survive the forced bottlenecks with diversity above the line by protecting Refuges.";
+        readout = `Colour diversity: <b>${div}%</b> <span class="muted">(need ≥${Math.round(lvl.goal.threshold * 100)}%)</span>`;
+      }
+    } else {
+      intro = "<b>Split one population into two.</b> Empty the middle with Rift predators; assortative mating keeps the two colour forms from blending back together.";
+      readout = `Split clarity: <b>${fill}%</b> <span class="muted">(two separated, balanced colour clusters)</span>`;
+    }
+    box.innerHTML = `
+      <div><span class="goal-target">Goal:</span> ${intro}</div>
+      <div style="margin-top:6px">${readout}</div>
       <div class="progress-track"><div class="progress-fill" style="width:${fill}%"></div></div>
       <div class="muted" style="margin-top:6px">${lvl.lesson}</div>`;
   }

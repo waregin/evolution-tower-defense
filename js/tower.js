@@ -77,6 +77,47 @@ export const TOWER_TYPES = {
     selects: "Selects AGAINST costly traits (armor, display): drives them to shrink or be lost.",
     damageFor: (c) => 14 * (c.genome.armor + c.genome.ornament),
   },
+  disaster: {
+    key: "disaster",
+    name: "Catastrophe",
+    icon: "☄️",
+    color: "#d65a5a",
+    cost: 65,
+    range: 115,
+    fireRate: 1.3,
+    damage: 26,
+    desc: "Random, non-selective death — kills prey regardless of their genes. Shrinks the breeding pool so genetic drift takes over.",
+    selects: "Selects for nothing: survival becomes a matter of luck (drift).",
+    damageFor: () => 26,
+  },
+  sanctuary: {
+    key: "sanctuary",
+    name: "Refuge",
+    icon: "🛟",
+    color: "#5ec8a0",
+    cost: 80,
+    range: 90,
+    fireRate: 0,
+    damage: 0,
+    passive: true,
+    desc: "A protected refuge population. Each refuge re-seeds extra breeders carrying the founding diversity, shielding the gene pool from drift.",
+    selects: "Counteracts drift by preserving population size and diversity.",
+    damageFor: () => 0,
+  },
+  rift: {
+    key: "rift",
+    name: "Rift",
+    icon: "🪓",
+    color: "#b483ff",
+    cost: 75,
+    range: 120,
+    fireRate: 1.3,
+    damage: 32,
+    desc: "Disruptive predator: hunts prey whose colour sits in the MIDDLE of the range, pushing the population toward two extremes.",
+    selects: "Disruptive selection: removes intermediates, splitting the population in two.",
+    // env carries the central hue to carve out; prey near it take full damage.
+    damageFor: (c, env) => 32 * (1 - Math.min(1, hueDistance(c.genome.hue, env) / 90)),
+  },
 };
 
 export class Tower {
@@ -97,6 +138,10 @@ export class Tower {
 
   update(dt, critters, env) {
     const def = this.def;
+
+    // Passive structures (e.g. the Refuge) do nothing during the wave; their
+    // effect is applied at breeding time by the game.
+    if (def.passive) return;
 
     // Frost: continuous slowing aura, no targeting.
     if (def.slow) {

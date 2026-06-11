@@ -34,12 +34,15 @@ const ri = (a, b, t) => Math.round(lerp(a, b, t));
 const roman = ["I", "II", "III", "IV", "V"];
 const SURV_TRAITS = ["hue", "speed", "armor", "toxinResistance"];
 const SEX_TRAITS = ["ornament", "preference", "speed", "hue"];
+const DRIFT_TRAITS = ["hue", "speed"];
+const SPEC_TRAITS = ["hue", "speed"];
+const PREFIX = { extinction: "E", survival: "S", sexual: "X", drift: "D", speciation: "P" };
 const shapeGoal = (minSurvivors, winFraction, target) => ({ minSurvivors, winFraction, target });
 
 // Assemble one mode's levels from its chapters (5 levels each).
 function buildMode(mode, chapters) {
   const total = chapters.length * 5;
-  const prefix = mode === "extinction" ? "E" : mode === "survival" ? "S" : "X";
+  const prefix = PREFIX[mode] || "?";
   const out = [];
   chapters.forEach((chapter, ch) => {
     for (let sub = 0; sub < 5; sub++) {
@@ -333,11 +336,100 @@ const SEXUAL = buildMode("sexual", [
   },
 ]);
 
-export const LEVELS = [...EXTINCTION, ...SURVIVAL, ...SEXUAL];
+// ---- GENETIC DRIFT (non-adaptive evolution; chance, not selection) ----------
+const DRIFT = buildMode("drift", [
+  {
+    theme: "Lucky Few", traits: DRIFT_TRAITS, examples: ["cheetah", "elephantSeal"],
+    lesson: "With no selection at all, a small population still evolves — allele frequencies drift at random, and a colour can fix purely by luck. Nothing here hunts by colour; only chance decides.",
+    build: (i, t, st) => ({
+      desc: "There's no 'best' colour — nothing selects on it. To make the population fix on ONE colour, you must shrink it: cull at random with Catastrophes so only a lucky few breed. Leave too few and they die out; leave too many and drift is too weak.",
+      environmentHue: 215, path: PATH_S,
+      start: { hue: { mean: 180, spread: 135 }, speed: { mean: 1.0, spread: 0.16 } },
+      popSize: ri(9, 12, st), generations: ri(12, 14, st),
+      startEnergy: ri(200, 230, st), incomePerGen: ri(95, 110, st),
+      allowedTowers: ["disaster", "frost"],
+      goal: { kind: "fixation", trait: "hue", threshold: 0.15, label: "fix one colour by drift" },
+    }),
+  },
+  {
+    theme: "Bottleneck", traits: DRIFT_TRAITS, examples: ["elephantSeal", "pingelap"],
+    lesson: "The smaller the surviving group, the faster diversity is lost. A population squeezed through a bottleneck emerges genetically uniform — like elephant seals after the sealers.",
+    build: (i, t, st) => ({
+      desc: "Bigger, more diverse founders. Squeeze them hard through a Catastrophe bottleneck every generation so a single colour fixes by chance before time runs out.",
+      environmentHue: 200, path: PATH_ZIG,
+      start: { hue: { mean: 180, spread: 140 }, speed: { mean: 1.0, spread: 0.16 } },
+      popSize: ri(13, 18, st), generations: ri(11, 14, st),
+      startEnergy: ri(240, 280, st), incomePerGen: ri(115, 135, st),
+      allowedTowers: ["disaster", "frost"],
+      goal: { kind: "fixation", trait: "hue", threshold: 0.13, label: "fix one colour by drift" },
+    }),
+  },
+  {
+    theme: "Refuge", traits: DRIFT_TRAITS, examples: ["pingelap", "cheetah"],
+    lesson: "Drift is the enemy of diversity. To conserve a small population's variation you must keep effective numbers up — here, by protecting refuges that carry the founding gene pool through each crash.",
+    build: (i, t, st) => ({
+      desc: "Now the goal flips: PRESERVE the colour diversity. Forced bottlenecks keep crashing the population and draining variation. Place Refuges — protected reservoirs of the founding diversity — to carry the gene pool through every crash.",
+      environmentHue: 190, path: PATH_SNAKE,
+      start: { hue: { mean: 180, spread: 150 }, speed: { mean: 1.0, spread: 0.16 } },
+      popSize: ri(18, 22, st), generations: ri(10, 12, st),
+      startEnergy: ri(280, 330, st), incomePerGen: ri(125, 150, st),
+      allowedTowers: ["sanctuary", "frost"],
+      bottlenecks: [{ atGen: 2, keep: 3 }, { atGen: 4, keep: 3 }, { atGen: 6, keep: 2 }, { atGen: 8, keep: 2 }, { atGen: 10, keep: 2 }],
+      goal: { kind: "diversity", trait: "hue", threshold: lerp(0.38, 0.45, st), minSurvivors: 1, label: `keep colour diversity ≥${Math.round(lerp(0.38, 0.45, st) * 100)}%` },
+    }),
+  },
+]);
+
+// ---- SPECIATION (disruptive selection + assortative mating → two forms) ------
+const SPECIATION = buildMode("speciation", [
+  {
+    theme: "Disruptive Selection", traits: SPEC_TRAITS, examples: ["rhagoletis", "cichlid"],
+    lesson: "When the middle of a range is selected against and like mates with like, one population is pulled apart into two — the seed of a new species.",
+    build: (i, t, st) => ({
+      desc: "These prey mate with colour-similar partners. Place Rift predators that hunt the MIDDLE colours, emptying the centre so two forms survive at the extremes — and, breeding only with their own kind, stop interbreeding.",
+      environmentHue: 180, path: PATH_S, assortment: lerp(8, 11, st),
+      start: { hue: { mean: 180, spread: 85 }, speed: { mean: 1.05, spread: 0.16 } },
+      popSize: ri(18, 22, st), generations: ri(11, 14, st),
+      startEnergy: ri(240, 280, st), incomePerGen: ri(120, 140, st),
+      allowedTowers: ["rift", "frost"],
+      goal: { kind: "split", minSurvivors: 4, label: "two separated colour forms" },
+    }),
+  },
+  {
+    theme: "Reproductive Isolation", traits: SPEC_TRAITS, examples: ["rhagoletis", "darwinFinch"],
+    lesson: "A split only sticks if the two forms stop interbreeding. Assortative mating is that barrier; without it, the extremes blend back into one.",
+    build: (i, t, st) => ({
+      desc: "Stronger mate-similarity here. Carve out the middle and hold the two colour forms apart long enough that they're reproductively isolated — two clusters that persist for generations.",
+      environmentHue: 160, path: PATH_ZIG, assortment: lerp(10, 13, st),
+      start: { hue: { mean: 160, spread: 85 }, speed: { mean: 1.05, spread: 0.16 } },
+      popSize: ri(18, 24, st), generations: ri(11, 14, st),
+      startEnergy: ri(250, 290, st), incomePerGen: ri(125, 145, st),
+      allowedTowers: ["rift", "frost", "claw"],
+      goal: { kind: "split", minSurvivors: 4, label: "two separated colour forms" },
+    }),
+  },
+  {
+    theme: "Two Species", traits: SPEC_TRAITS, examples: ["cichlid", "rhagoletis", "darwinFinch"],
+    lesson: "Repeated across a lake or a landscape, disruptive selection plus isolation builds whole flocks of species — as in the cichlids of the African Great Lakes.",
+    build: (i, t, st) => ({
+      desc: "The full challenge: bigger, tighter populations on hard maps. Split them cleanly into two well-separated, balanced colour species and keep them isolated.",
+      environmentHue: 200, path: MAPS[(i + 1) % MAPS.length], assortment: lerp(11, 14, st),
+      start: { hue: { mean: 200, spread: 88 }, speed: { mean: 1.1, spread: 0.18 } },
+      popSize: ri(20, 26, st), generations: ri(12, 15, st),
+      startEnergy: ri(260, 300, st), incomePerGen: ri(130, 150, st),
+      allowedTowers: ["rift", "frost", "claw"],
+      goal: { kind: "split", minSurvivors: 4, label: "two separated colour forms" },
+    }),
+  },
+]);
+
+export const LEVELS = [...EXTINCTION, ...SURVIVAL, ...SEXUAL, ...DRIFT, ...SPECIATION];
 
 // Group boundaries for the level picker (optgroups).
 export const LEVEL_GROUPS = [
   { label: "🛡️ Extinction (classic defense)", start: 0, count: 30 },
   { label: "🌱 Survival (shape the species)", start: 30, count: 30 },
   { label: "💃 Sexual selection (mate choice)", start: 60, count: 30 },
+  { label: "🎲 Genetic drift (chance, not selection)", start: 90, count: 15 },
+  { label: "🧬 Speciation (one population becomes two)", start: 105, count: 15 },
 ];

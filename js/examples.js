@@ -110,6 +110,34 @@ export const EXAMPLES = {
       "Tiktaalik, a 375-million-year-old fossil from Arctic Canada, captures fish becoming land animals. It kept fish gills, scales and fins, but also had a flat crocodile-like head, a mobile neck, and sturdy fin bones with wrist-like joints that could prop it up in the shallows.",
     source: { cite: "Daeschler, Shubin & Jenkins (2006), Nature", url: "https://www.nature.com/articles/nature04639" },
   },
+  elephantSeal: {
+    taxon: "🦭 Northern elephant seal",
+    concept: "Bottleneck & genetic drift",
+    blurb:
+      "Hunted for their blubber, northern elephant seals crashed to perhaps as few as ~20 animals in the 1890s before rebounding to hundreds of thousands today. Yet a survey of two dozen genes found essentially no variation left: the bottleneck scrubbed the species' diversity by chance, not by selection.",
+    source: { cite: "Bonnell & Selander (1974), Science", url: "https://pubmed.ncbi.nlm.nih.gov/4825892/" },
+  },
+  cheetah: {
+    taxon: "🐆 Cheetah",
+    concept: "Lost diversity from drift",
+    blurb:
+      "Cheetahs carry remarkably little genetic variation — so little that unrelated cheetahs accept skin grafts from one another, as if immunological twins. Severe bottlenecks in their past, not any benefit, left the species genetically impoverished and vulnerable.",
+    source: { cite: "O'Brien et al. (1985), Science", url: "https://www.science.org/doi/10.1126/science.2983425" },
+  },
+  pingelap: {
+    taxon: "🏝️ Pingelap islanders",
+    concept: "Founder effect",
+    blurb:
+      "After a 1775 typhoon left only about 20 survivors on the Micronesian atoll of Pingelap — one of them a carrier of complete colour-blindness (achromatopsia) — the condition became extraordinarily common as the population regrew, affecting roughly a tenth of Pingelapese today. The CNGB3 gene wasn't favoured; it rode to high frequency purely by chance.",
+    source: { cite: "Sundin et al. (2000), Nature Genetics; popularised by O. Sacks (1996)", url: "https://www.science.org/content/article/colorblindness-gene-found-pacific-islanders" },
+  },
+  rhagoletis: {
+    taxon: "🪰 Apple maggot fly",
+    concept: "Speciation in progress (sympatric)",
+    blurb:
+      "The apple maggot fly fed only on hawthorns until apples arrived in North America; by the mid-1800s some flies had switched to apple. Because the flies mate on the fruit they grew up on — and apples ripen earlier than hawthorns — the two 'host races' increasingly breed apart, with no geographic barrier between them. Speciation caught in the act.",
+    source: { cite: "Feder, Chilcote & Bush (1988), Nature", url: "https://www.nature.com/articles/336061a0" },
+  },
 };
 
 // Resolve an example id to its record (with the id attached).
