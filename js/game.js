@@ -4,6 +4,7 @@ import { Tower, TOWER_TYPES } from "./tower.js";
 import {
   TRAITS, TRAIT_KEYS, randomGenome, breed, meanTrait, hueDistance, hueColor, weightedIndex,
 } from "./genetics.js";
+import { getExample } from "./examples.js";
 
 const GRID = { cols: 20, rows: 15, cell: 40 };
 const SPEEDS = [1, 2, 4];
@@ -40,8 +41,10 @@ export class Game {
     this.state = "idle";      // idle | running | won | lost
     this.result = null;
     this.selectedTower = null;
+    this.sellMode = false;
 
     this._computeBlocked();
+    this._placePreset(level.preplaced);
     // Note: no _emit() here — the UI rebuilds this level's panels in
     // onLevelLoaded() and renders itself. Emitting now would render against
     // the previous level's tower buttons.
@@ -61,6 +64,20 @@ export class Game {
         const y = a.y + ((b.y - a.y) * s) / steps;
         this.blocked.add(`${Math.floor(x / cell)},${Math.floor(y / cell)}`);
       }
+    }
+  }
+
+  // Pre-place pressures the level starts with. They are normal towers the player
+  // can sell or build around — the point is to give an existing force to manage.
+  _placePreset(preset) {
+    if (!preset) return;
+    for (const p of preset) {
+      const x = p.col * GRID.cell + GRID.cell / 2;
+      const y = p.row * GRID.cell + GRID.cell / 2;
+      const t = new Tower(p.type, x, y);
+      t.col = p.col; t.row = p.row;
+      this.towers.push(t);
+      this.occupied.add(`${p.col},${p.row}`);
     }
   }
 
@@ -198,15 +215,100 @@ export class Game {
 
   _finish(won, message) {
     this.state = won ? "won" : "lost";
-    this.result = { won, message };
+    const outcome = this._computeOutcome(won);
+    this.result = {
+      won, message,
+      stars: outcome.stars,
+      score: outcome.score,
+      breakdown: outcome.breakdown,
+      recap: this._recap(),
+      example: getExample(this.level.example),
+      generations: this.gen,
+    };
     this._emit();
     this.hooks.onEnd?.(this.result);
+  }
+
+  // Star rating (0–3). Shaping levels reward precise, fast selection — letting
+  // only just enough prey through, per the original design note that excess
+  // survivors mean weak selection. Extinction rewards a healthy base / a clean
+  // wipe-out. Both reward finishing in fewer generations.
+  _computeOutcome(won) {
+    const lvl = this.level;
+    const c01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+    const speed = lvl.generations > 1 ? c01(1 - (this.gen - 1) / (lvl.generations - 1)) : 1;
+    const breakdown = [];
+    let eff;
+
+    if (!this.isShaping) {
+      const baseFrac = this.maxBaseHealth ? this.baseHealth / this.maxBaseHealth : 1;
+      const extinct = this.survivors.length === 0;
+      eff = extinct ? 1 : 0.65 * baseFrac + 0.35 * speed;
+      breakdown.push(["Base intact", `${Math.round(baseFrac * 100)}%`]);
+      breakdown.push(["Generations", `${this.gen}/${lvl.generations}`]);
+      if (extinct) breakdown.push(["Outcome", "prey driven fully extinct"]);
+    } else {
+      const goal = lvl.goal;
+      const isCull = goal.target.dir !== "above";
+      let precision = 1;
+      if (isCull && this.stats.length) {
+        let sum = 0;
+        for (const st of this.stats) sum += Math.max(0, st.survivors - goal.minSurvivors);
+        const avg = sum / this.stats.length;
+        const denom = Math.max(1, lvl.popSize - goal.minSurvivors);
+        precision = 1 - c01(avg / denom);
+      }
+      eff = isCull ? 0.55 * precision + 0.45 * speed : speed;
+      breakdown.push(["Generations", `${this.gen}/${lvl.generations}`]);
+      if (isCull) breakdown.push(["Selection tightness", `${Math.round(precision * 100)}%`]);
+    }
+
+    const stars = !won ? 0 : eff >= 0.66 ? 3 : eff >= 0.33 ? 2 : 1;
+    return { stars, score: Math.round(eff * 1000), breakdown };
+  }
+
+  // A short "what your population did" summary: the goal trait plus the biggest
+  // movers, from the founding generation to the last.
+  _recap() {
+    if (this.stats.length < 1) return [];
+    const first = this.stats[0].means;
+    const last = this.stats[this.stats.length - 1].means;
+    const focus = this.isShaping ? this.level.goal.target.trait : null;
+    const norm = (k, v) => (TRAITS[k].wrap ? v / 360 : (v - TRAITS[k].min) / (TRAITS[k].max - TRAITS[k].min));
+    const movers = this.level.traits
+      .map((k) => {
+        const d = TRAITS[k].wrap ? hueDistance(first[k], last[k]) / 180 : Math.abs(norm(k, last[k]) - norm(k, first[k]));
+        return { k, d };
+      })
+      .sort((a, b) => b.d - a.d);
+    const order = [];
+    if (focus) order.push(focus);
+    for (const m of movers) if (m.k !== focus && m.d > 0.07 && order.length < 3) order.push(m.k);
+    return order.map((k) => ({
+      key: k,
+      label: TRAITS[k].label,
+      from: TRAITS[k].describe(first[k]),
+      to: TRAITS[k].describe(last[k]),
+    }));
   }
 
   // ---- player actions -----------------------------------------------------
   selectTowerType(type) {
     this.selectedTower = this.selectedTower === type ? null : type;
+    if (this.selectedTower) this.sellMode = false;
     this._emit();
+  }
+
+  toggleSellMode() {
+    this.sellMode = !this.sellMode;
+    if (this.sellMode) this.selectedTower = null;
+    this._emit();
+  }
+
+  // A tap/click on the board: sell if in sell mode, otherwise place.
+  tapBoard(px, py) {
+    if (this.sellMode) this.sellAt(px, py);
+    else this.placeTower(px, py);
   }
 
   cellAt(px, py) {

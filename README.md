@@ -1,8 +1,9 @@
 # 🧬 Evolution Tower Defense
 
 A tower defense game that teaches **evolution** — natural selection, heredity,
-the predator–prey **arms race**, and **sexual selection** — by letting you *be*
-the selection pressure. Three modes, **25 levels each (75 total)**.
+the predator–prey **arms race**, **sexual selection**, and the loss of costly
+traits — by letting you *be* the selection pressure. Three modes, **30 levels each
+(90 total)**, every level ending with the real-world species and study it mirrors.
 
 The critters walking the path are **prey** carrying genes. The towers you place
 are **selection pressures** (predators and climate). Crucially, every prey that
@@ -34,33 +35,34 @@ It also works as-is on **GitHub Pages** (Settings → Pages → deploy from bran
 ## Three modes, one engine
 
 All three modes share the same simulation; they differ only in the win condition.
-Each has **25 levels** organized into five themed chapters that introduce a
-concept and ramp the difficulty.
+Each has **30 levels** organized into six themed chapters that introduce a concept
+and ramp the difficulty.
 
 - **🛡️ Extinction** (classic tower defense). Stop the prey before they reach the
   refuge. But survivors breed and adapt to whatever pressure you over-use — that's
   the predator–prey arms race made visible. Win by surviving every generation, or
   by wiping the prey out entirely. *(Chapters: Claws → Venom → The Hunter's Eye →
-  Full Arsenal → Arms-Race Gauntlet.)*
+  Full Arsenal → Arms-Race Gauntlet → Scarcity.)*
 
 - **🌱 Survival** (you are the environment). This is the inversion from the original
   design notes: the species must **not** go extinct, so you *have* to let some
   prey through. By choosing *which* prey die each generation, you steer the
   population's average traits toward a goal — breed it green, toxin-resistant,
-  armored, or a designer color. Apply too little pressure and nothing changes;
-  apply too much and you drive the species extinct. The sweet spot in between is
-  real selection. *(Chapters: Breed for Green → Build a Tank → Forge Armor →
-  Designer Colors → Conservation.)*
+  armored, a designer color, or strip away armor it no longer needs. Apply too
+  little pressure and nothing changes; apply too much and you drive the species
+  extinct. *(Chapters: Breed for Green → Build a Tank → Forge Armor → Designer
+  Colors → Conservation → Use It or Lose It.)*
 
 - **💃 Sexual selection** (mate choice vs. natural selection). These prey breed by
   choosing showy mates, so a costly **display** ornament keeps growing on its own —
   *Fisherian runaway*. Both the display and the *preference* for it are inherited,
   so they co-evolve and the ornament escalates toward a high natural equilibrium,
   even though it makes prey slower and easier for a visual hunter to spot (the
-  *handicap principle*). Your predation is the only force that pushes the display
-  back down, so most levels are a tug-of-war: land the ornament in a target window
-  without driving the species extinct. *(Chapters: Runaway → Curb the Display →
-  The Handicap Balance → Strong Preference → Coevolution Gauntlet.)*
+  *handicap principle*). Predation and scarcity are the forces that push the
+  display back down, so most levels are a tug-of-war: land the ornament in a target
+  window without driving the species extinct. *(Chapters: Runaway → Curb the
+  Display → The Handicap Balance → Strong Preference → Coevolution Gauntlet → The
+  Cost of Beauty.)*
 
 ## The biology, mapped to mechanics
 
@@ -74,6 +76,7 @@ for the trait that counters it:
 | 🧪 Venom sprayer | **Toxin resistance** | Selection limited by standing variation |
 | 👁️ Visual hunter | **Color** matching the background, and *against* big displays | Camouflage; natural vs. sexual selection |
 | ❄️ Cold snap | — (slows prey, no damage) | The environment as a pressure |
+| 🍂 Scarcity | drains prey burdened by **armor or display** | Costly traits get lost when their benefit is gone |
 
 The two sexual-selection genes only come into play in mate-choice levels: a big
 **display** wins matings but slows prey and makes them conspicuous, while
@@ -98,6 +101,32 @@ a line chart of how each trait's average shifts generation over generation.
 - In sexual-selection mode, a costly ornament runs away on its own through mate
   choice, and only predation (natural selection) can rein it back in — you can
   literally watch the two forces fight to a balance point.
+- When the predators that once made armor worthwhile are gone, scarcity makes that
+  armor pure cost, and the population sheds it — the "use it or lose it" logic
+  behind cavefish losing their eyes and horses losing their toes.
+
+## Scoring, stars & progress
+
+Each level is rated **1–3 ⭐**. You earn more for finishing in fewer generations
+and — on shaping levels — for *tight* selection: letting through only just enough
+prey, per the original note that excess survivors mean weak selection. Win a few
+levels in a chapter to **unlock the next**; progress (stars and unlocks) is saved
+in your browser's `localStorage`.
+
+## Learn from real life
+
+Evolution here isn't an abstraction — every level ends with a **debrief**: a recap
+of what your population actually did (e.g. *Armor 18% → 54% over 11 generations*)
+and the matching **real-world case study**, drawn from across the animal kingdom.
+You'll meet the peppered moth, Trinidad guppies, long-tailed widowbirds, Darwin's
+finches, rock pocket mice, three-spine sticklebacks, Mexican cavefish, red deer,
+African cichlids, the horse's vanishing toes, why hyenas are cats not dogs,
+tuskless elephants, warfarin-resistant rats, whales, and Tiktaalik.
+
+Accuracy is treated as non-negotiable — if the facts were wrong the tool would be
+worse than useless. Each case study carries a **source** to the primary literature
+(or a reputable educational reference), kept deliberately low-key in the UI. They
+live, with citations, in [`js/examples.js`](js/examples.js).
 
 ## Project layout
 
@@ -108,18 +137,33 @@ js/
   genetics.js     traits, heredity, mutation, population stats
   critter.js      an individual organism (movement, defenses, rendering)
   tower.js        selection pressures (trait-dependent damage)
-  levels.js       the 75-level generator (25 per mode, five chapters each)
-  game.js         the simulation engine (generations, breeding, mate choice, win/loss)
-  ui.js           sidebar panels, the live genetics charts, input handling
+  levels.js       the 90-level generator (30 per mode, six chapters each)
+  examples.js     the sourced real-world case studies shown in debriefs
+  game.js         the simulation engine (generations, breeding, mate choice, scoring)
+  progress.js     saved stars and chapter unlocks (localStorage)
+  ui.js           sidebar panels, live genetics charts, debrief, input (incl. touch)
   main.js         bootstrap that wires the game and UI together
+test/
+  balance.mjs     headless regression test: every level valid, runnable, winnable
 ```
+
+### Tests
+
+```bash
+node test/balance.mjs   # asserts all 90 levels are structurally valid and beatable
+```
+
+The engine is decoupled from the DOM, so the test drives the real simulation with a
+mocked canvas. It runs every level to a terminal state and checks that a sensible
+strategy can win it — so a tweak to a trait constant can't silently make a level
+unbeatable.
 
 ## Roadmap
 
-Possible future directions: per-player progress/level unlocking, a sandbox mode
-with adjustable parameters, frequency-dependent selection (where a trait's value
-depends on how common it is), and host–parasite coevolution as a second kind of
-arms race.
+Possible future directions: a sandbox mode with adjustable parameters,
+frequency-dependent selection (where a trait's value depends on how common it is),
+genetic drift in small populations as its own lesson, and host–parasite
+coevolution as a second kind of arms race.
 
 ---
 

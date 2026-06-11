@@ -1,8 +1,8 @@
-// levels.js — 75 levels (25 per mode) built by a difficulty-scaling generator.
-// All three modes share one engine; a level just sets the map, the starting
-// gene pool, the available pressures, and the win rule. Levels are grouped into
-// five themed "chapters" of five per mode, each chapter introducing a concept
-// and ramping difficulty across its five levels and across the mode as a whole.
+// levels.js — 90 levels (30 per mode) built by a difficulty-scaling generator.
+// All three modes share one engine; a level sets the map, the founding gene pool,
+// the available pressures, and the win rule. Levels are grouped into six themed
+// chapters of five per mode; each chapter teaches a concept, ramps difficulty, and
+// is tied to a real-world case study (shown in the end-of-level debrief).
 
 // ---- maps -------------------------------------------------------------------
 const PATH_S = [
@@ -32,42 +32,39 @@ const MAPS = [PATH_S, PATH_ZIG, PATH_SNAKE, PATH_U, PATH_CHICANE];
 const lerp = (a, b, t) => a + (b - a) * t;
 const ri = (a, b, t) => Math.round(lerp(a, b, t));
 const roman = ["I", "II", "III", "IV", "V"];
+const SURV_TRAITS = ["hue", "speed", "armor", "toxinResistance"];
+const SEX_TRAITS = ["ornament", "preference", "speed", "hue"];
+const shapeGoal = (minSurvivors, winFraction, target) => ({ minSurvivors, winFraction, target });
 
-function makeLevel(mode, ch, sub, cfg) {
-  // ch: 0..4 chapter, sub: 0..4 level within chapter. Global index i = ch*5+sub.
-  const i = ch * 5 + sub;
-  const t = i / 24;            // 0..1 across the whole mode
-  const st = sub / 4;          // 0..1 within the chapter
-  return cfg(i, t, st, ch, sub);
-}
-
+// Assemble one mode's levels from its chapters (5 levels each).
 function buildMode(mode, chapters) {
+  const total = chapters.length * 5;
+  const prefix = mode === "extinction" ? "E" : mode === "survival" ? "S" : "X";
   const out = [];
   chapters.forEach((chapter, ch) => {
     for (let sub = 0; sub < 5; sub++) {
-      out.push(makeLevel(mode, ch, sub, (i, t, st, c, s) => {
-        const lvl = chapter.build(i, t, st, s);
-        lvl.id = `${mode}-${i + 1}`;
-        lvl.mode = mode;
-        lvl.name = `${mode === "extinction" ? "E" : mode === "survival" ? "S" : "X"}${i + 1} · ${chapter.theme} · ${roman[s]}`;
-        lvl.lesson = lvl.lesson || chapter.lesson;
-        lvl.traits = lvl.traits || chapter.traits;
-        lvl.spawnInterval = lvl.spawnInterval ?? lerp(0.72, 0.44, t);
-        lvl.path = lvl.path || MAPS[i % MAPS.length];
-        return lvl;
-      }));
+      const i = ch * 5 + sub;
+      const t = total > 1 ? i / (total - 1) : 0;   // difficulty across the mode
+      const st = sub / 4;                           // difficulty within the chapter
+      const lvl = chapter.build(i, t, st, sub);
+      lvl.id = `${mode}-${i + 1}`;
+      lvl.mode = mode;
+      lvl.name = `${prefix}${i + 1} · ${chapter.theme} · ${roman[sub]}`;
+      lvl.lesson = lvl.lesson || chapter.lesson;
+      lvl.traits = lvl.traits || chapter.traits;
+      lvl.spawnInterval = lvl.spawnInterval ?? lerp(0.72, 0.46, t);
+      lvl.path = lvl.path || MAPS[i % MAPS.length];
+      lvl.example = lvl.example || (chapter.examples ? chapter.examples[sub % chapter.examples.length] : null);
+      out.push(lvl);
     }
   });
   return out;
 }
 
-const SURV_TRAITS = ["hue", "speed", "armor", "toxinResistance"];
-const SEX_TRAITS = ["ornament", "preference", "speed", "hue"];
-
 // ---- EXTINCTION (classic tower defense; survivors adapt to your pressures) ---
 const EXTINCTION = buildMode("extinction", [
   {
-    theme: "Claws", traits: SURV_TRAITS,
+    theme: "Claws", traits: SURV_TRAITS, examples: ["darwinFinch", "pepperedMoth"],
     lesson: "Selection acts on survivors. If armored prey are the ones escaping your claws, the next generation will be more armored.",
     build: (i, t, st) => ({
       desc: "Wipe out the prey before they reach the refuge. Whoever escapes breeds — and passes on whatever helped them through.",
@@ -80,7 +77,7 @@ const EXTINCTION = buildMode("extinction", [
     }),
   },
   {
-    theme: "Venom", traits: SURV_TRAITS,
+    theme: "Venom", traits: SURV_TRAITS, examples: ["warfarinRat"],
     lesson: "A single strong pressure selects for one defense. Diverse pressures stop any one counter-trait from taking over.",
     build: (i, t, st) => ({
       desc: "Venom is available. Lean too hard on one pressure and the prey evolve a counter to it. Mixing pressures keeps them off balance.",
@@ -93,10 +90,10 @@ const EXTINCTION = buildMode("extinction", [
     }),
   },
   {
-    theme: "The Hunter's Eye", traits: SURV_TRAITS,
+    theme: "The Hunter's Eye", traits: SURV_TRAITS, examples: ["pepperedMoth", "pocketMouse"],
     lesson: "Predators drive prey toward camouflage. That escalation — predator vs. prey defense — is an evolutionary arms race.",
     build: (i, t, st) => ({
-      desc: "A visual hunter joins the fight. It can barely see prey that match the background, so the prey will evolve camouflage to slip past.",
+      desc: "A visual hunter joins the fight. It can barely see prey that match the background, so the prey will evolve camouflage to slip past. Pair it with claws — alone it just trains them to hide.",
       environmentHue: 120,
       start: { hue: { mean: 25, spread: 80 }, speed: { mean: 1.05, spread: 0.16 } },
       popSize: ri(18, 22, st), generations: ri(9, 12, st),
@@ -106,7 +103,7 @@ const EXTINCTION = buildMode("extinction", [
     }),
   },
   {
-    theme: "Full Arsenal", traits: SURV_TRAITS,
+    theme: "Full Arsenal", traits: SURV_TRAITS, examples: ["darwinFinch", "pocketMouse", "warfarinRat", "pepperedMoth", "guppy"],
     lesson: "With every counter-trait under selection at once, no single defense saves the prey — but they can't max them all, because armor and display cost speed.",
     build: (i, t, st) => ({
       desc: "Every pressure is on the table now, and the prey arrive already partly adapted. Combine claws, venom and the hunter to leave no escape.",
@@ -122,8 +119,8 @@ const EXTINCTION = buildMode("extinction", [
     }),
   },
   {
-    theme: "Arms-Race Gauntlet", traits: SURV_TRAITS,
-    lesson: "Pre-adapted prey, breeding fast, will out-evolve a static defense. You have to keep adapting too — that's the Red Queen: run just to stay in place.",
+    theme: "Arms-Race Gauntlet", traits: SURV_TRAITS, examples: ["elephant", "hyena", "whale", "tiktaalik", "horse"],
+    lesson: "Pre-adapted prey, breeding fast, will out-evolve a static defense. You have to keep adapting too — the Red Queen: run just to stay in place.",
     build: (i, t, st) => ({
       desc: "The toughest prey yet: well-defended, fast-breeding, swarming. Adapt your pressures every generation or be overrun.",
       environmentHue: 130,
@@ -137,16 +134,28 @@ const EXTINCTION = buildMode("extinction", [
       extinction: { baseHealth: ri(14, 16, st) },
     }),
   },
+  {
+    theme: "Scarcity", traits: SURV_TRAITS, examples: ["cavefish", "stickleback", "horse"],
+    lesson: "Scarcity punishes costly armor, so it strikes exactly the prey your claws can't — when a defense becomes a burden, a new pressure exploits it.",
+    build: (i, t, st) => ({
+      desc: "Resource scarcity now drains heavily-armored prey. It hits the tough, slow ones your claws struggle with — squeeze the prey between predation and starvation so no body plan is safe.",
+      environmentHue: 40,
+      start: {
+        hue: { mean: 40, spread: 50 }, speed: { mean: 1.15, spread: 0.18 },
+        armor: { mean: 0.28, spread: 0.14 }, toxinResistance: { mean: 0.15, spread: 0.1 },
+      },
+      popSize: ri(22, 25, st), generations: ri(12, 15, st),
+      startEnergy: ri(290, 330, st), incomePerGen: ri(135, 155, st),
+      allowedTowers: ["claw", "famine", "venom", "frost"],
+      extinction: { baseHealth: ri(15, 18, st) },
+    }),
+  },
 ]);
 
 // ---- SURVIVAL (you are the environment; shape the population, keep it alive) -
-function shapeGoal(minSurvivors, winFraction, target) {
-  return { minSurvivors, winFraction, target };
-}
-
 const SURVIVAL = buildMode("survival", [
   {
-    theme: "Breed for Green", traits: SURV_TRAITS,
+    theme: "Breed for Green", traits: SURV_TRAITS, examples: ["pocketMouse", "pepperedMoth"],
     lesson: "Directional selection: remove one extreme each generation and the whole population's average shifts — here, toward green.",
     build: (i, t, st) => ({
       desc: "Now YOU are the environment. Keep the species alive (let the minimum through), and use the visual hunter against the green background so only well-camouflaged green prey survive to breed.",
@@ -160,7 +169,7 @@ const SURVIVAL = buildMode("survival", [
     }),
   },
   {
-    theme: "Build a Tank", traits: SURV_TRAITS,
+    theme: "Build a Tank", traits: SURV_TRAITS, examples: ["warfarinRat", "stickleback"],
     lesson: "The same logic builds any trait — but selection can only act on variation that already exists, so resistance climbs slowly at first.",
     build: (i, t, st) => ({
       desc: "Keep the species alive but breed it tough. Cull the weak with venom so only toxin-hardened prey reproduce. Ramp up gradually — too much venom at once collapses the population.",
@@ -174,8 +183,8 @@ const SURVIVAL = buildMode("survival", [
     }),
   },
   {
-    theme: "Forge Armor", traits: SURV_TRAITS,
-    lesson: "Predators are agents of selection: clawed hunters kill the soft-bodied first, so the survivors — and every generation after — are better armored. Beware: armor slows prey, and too many claws wipe the soft starting population out entirely.",
+    theme: "Forge Armor", traits: SURV_TRAITS, examples: ["darwinFinch", "redDeer"],
+    lesson: "Predators are agents of selection: clawed hunters kill the soft-bodied first, so the survivors are better armored. But armor slows prey, and too many claws wipe the soft founders out entirely.",
     build: (i, t, st) => ({
       desc: "Use clawed predators to cull the lightly-armored. The survivors pass on their plating, so armor climbs generation by generation. Ramp up slowly — a wall of claws annihilates the soft-shelled founders before they can breed.",
       environmentHue: 35, path: PATH_SNAKE,
@@ -188,59 +197,75 @@ const SURVIVAL = buildMode("survival", [
     }),
   },
   {
-    theme: "Designer Colors", traits: SURV_TRAITS,
-    lesson: "Selection toward a moving or unusual target shows the same machinery at work — and tighter goals demand more careful, sustained pressure.",
+    theme: "Designer Colors", traits: SURV_TRAITS, examples: ["cichlid", "pocketMouse", "pepperedMoth"],
+    lesson: "Selection toward an unusual target uses the same machinery — and tighter goals demand more careful, sustained pressure.",
     build: (i, t, st) => {
-      const hue = [275, 200, 45, 330, 160][i % 5]; // varied target colors
+      const hue = [275, 200, 45, 330, 160][i % 5];
       return {
         desc: "Sculpt the population to a specific color by matching the background and culling the misfits. The tighter the shade you need, the more precise your selection must be.",
         environmentHue: hue, path: MAPS[i % MAPS.length],
-        start: { hue: { mean: (hue + 150) % 360, spread: 85 }, speed: { mean: 1.05, spread: 0.16 } },
-        popSize: ri(20, 24, st), generations: ri(12, 16, st),
+        start: { hue: { mean: (hue + 120) % 360, spread: 80 }, speed: { mean: 1.05, spread: 0.16 } },
+        popSize: ri(20, 24, st), generations: ri(13, 17, st),
         startEnergy: ri(250, 290, st), incomePerGen: ri(125, 145, st),
         allowedTowers: ["hawk", "frost", "claw"],
-        goal: shapeGoal(ri(5, 4, st), lerp(0.68, 0.78, st),
-          { trait: "hue", value: hue, tolerance: ri(30, 22, st), dir: "near", label: `${Math.round(hue)}°` }),
+        goal: shapeGoal(4, lerp(0.62, 0.72, st),
+          { trait: "hue", value: hue, tolerance: ri(34, 26, st), dir: "near", label: `${Math.round(hue)}°` }),
       };
     },
   },
   {
-    theme: "Conservation", traits: SURV_TRAITS,
+    theme: "Conservation", traits: SURV_TRAITS, examples: ["elephant", "darwinFinch", "whale"],
     lesson: "Small populations and harsh selection are a dangerous mix: push too hard and you cause the very extinction you were trying to prevent.",
     build: (i, t, st) => ({
       desc: "The hardest shaping of all: a demanding trait target with a thin survival margin. Apply enough pressure to hit the goal, but not so much that the species winks out.",
       environmentHue: 150, path: MAPS[(i + 2) % MAPS.length],
       start: { hue: { mean: 20, spread: 80 }, speed: { mean: 1.0, spread: 0.16 }, toxinResistance: { mean: 0.15, spread: 0.12 } },
-      popSize: ri(18, 22, st), generations: ri(14, 18, st),
+      popSize: ri(18, 22, st), generations: ri(15, 19, st),
       startEnergy: ri(260, 300, st), incomePerGen: ri(130, 150, st),
       allowedTowers: ["hawk", "venom", "frost", "claw"],
-      goal: shapeGoal(ri(5, 6, st), lerp(0.7, 0.8, st),
-        { trait: "hue", value: 150, tolerance: ri(28, 22, st), dir: "near", label: "green-cyan (150°)" }),
+      goal: shapeGoal(ri(4, 5, st), lerp(0.66, 0.74, st),
+        { trait: "hue", value: 150, tolerance: ri(32, 26, st), dir: "near", label: "green-cyan (150°)" }),
+    }),
+  },
+  {
+    theme: "Use It or Lose It", traits: SURV_TRAITS, examples: ["cavefish", "horse", "stickleback"],
+    lesson: "A once-useful trait that's now only a cost gets selected away. With the predators gone, heavy armor is pure burden — scarcity strips it back, just like cavefish losing eyes or sticklebacks shedding plates.",
+    build: (i, t, st) => ({
+      desc: "These prey inherited heavy armor from an age of predators that's now over. The armor only slows them and costs energy. Use scarcity to make the burden lethal, so the population sheds the plating it no longer needs.",
+      environmentHue: 30, path: MAPS[(i + 1) % MAPS.length],
+      start: { armor: { mean: 0.5, spread: 0.17 }, hue: { mean: 30, spread: 35 }, speed: { mean: 1.0, spread: 0.15 } },
+      popSize: ri(20, 24, st), generations: ri(14, 17, st),
+      startEnergy: ri(240, 270, st), incomePerGen: ri(120, 140, st),
+      allowedTowers: ["famine", "frost"],
+      goal: shapeGoal(4, lerp(0.5, 0.6, st),
+        { trait: "armor", value: lerp(0.28, 0.22, st), tolerance: 0, dir: "below", label: `below ${Math.round(lerp(0.28, 0.22, st) * 100)}% armor` }),
     }),
   },
 ]);
 
 // ---- SEXUAL SELECTION (mate choice vs. natural selection) --------------------
+const HAWK_SPOTS_S = [{ col: 5, row: 5 }, { col: 9, row: 5 }, { col: 8, row: 9 }, { col: 13, row: 9 }];
 const SEXUAL = buildMode("sexual", [
   {
-    theme: "Runaway", traits: SEX_TRAITS,
-    lesson: "Fisherian runaway: choosy maters breed with showy maters, their offspring inherit both the display and the taste for it, and the ornament escalates on its own — no predator required.",
-    build: (i, t, st) => ({
-      desc: "These prey choose flashy mates. Just keep the species alive and watch the ornament balloon over the generations, even though it slows them down. Hold off on predators — they only suppress the display — and let runaway carry the population past the target.",
+    theme: "Runaway", traits: SEX_TRAITS, examples: ["widowbird", "cichlid"],
+    lesson: "Fisherian runaway: choosy maters breed with showy maters, their offspring inherit both the display and the taste for it, and the ornament escalates on its own — once you lift the predators holding it down.",
+    build: (i, t, st, sub) => ({
+      desc: "These prey choose flashy mates, so the display wants to balloon. But a hunter is already here, picking off the showiest. Sell off that predation (right-click, or the Sell tool) to release the brakes and let runaway carry the display past the target.",
       environmentHue: 210, path: PATH_S, mateChoice: true, choosiness: lerp(5, 6, st),
+      preplaced: HAWK_SPOTS_S.slice(0, sub < 2 ? 2 : sub < 4 ? 3 : 4).map((c) => ({ type: "hawk", ...c })),
       start: { ornament: { mean: 0.06, spread: 0.05 }, preference: { mean: 0.4, spread: 0.16 }, hue: { mean: 210, spread: 18 }, speed: { mean: 1.1, spread: 0.14 } },
-      popSize: ri(18, 22, st), generations: ri(9, 12, st),
+      popSize: ri(18, 22, st), generations: ri(10, 13, st),
       startEnergy: ri(170, 200, st), incomePerGen: ri(75, 90, st),
-      allowedTowers: ["frost", "claw"],
+      allowedTowers: ["hawk", "frost", "claw"],
       goal: shapeGoal(4, lerp(0.5, 0.6, st),
         { trait: "ornament", value: lerp(0.45, 0.55, st), tolerance: 0, dir: "above", label: `${Math.round(lerp(0.45, 0.55, st) * 100)}%+ display` }),
     }),
   },
   {
-    theme: "Curb the Display", traits: SEX_TRAITS,
+    theme: "Curb the Display", traits: SEX_TRAITS, examples: ["guppy"],
     lesson: "Natural selection can oppose sexual selection. A visual hunter punishes showy prey, so predation pulls the ornament back down — the handicap made lethal. Push too hard, though, and you wipe out the showy population.",
     build: (i, t, st) => ({
-      desc: "Sexual selection is inflating the display. Use the visual hunter — which spots showy prey easily — to make the ornament too costly, dragging it below the target. Don't over-hunt: the prey are mostly showy now, so a wall of hunters collapses the species.",
+      desc: "Sexual selection has inflated the display. Use the visual hunter — which spots showy prey easily — to make the ornament too costly, dragging it below the target. Don't over-hunt: the prey are mostly showy now, so a wall of hunters collapses the species.",
       environmentHue: 210, path: PATH_ZIG, mateChoice: true, choosiness: lerp(4, 5, st),
       start: { ornament: { mean: 0.4, spread: 0.16 }, preference: { mean: 0.4, spread: 0.16 }, hue: { mean: 210, spread: 16 }, speed: { mean: 1.1, spread: 0.14 } },
       popSize: ri(18, 22, st), generations: ri(11, 14, st),
@@ -251,7 +276,7 @@ const SEXUAL = buildMode("sexual", [
     }),
   },
   {
-    theme: "The Handicap Balance", traits: SEX_TRAITS,
+    theme: "The Handicap Balance", traits: SEX_TRAITS, examples: ["guppy", "redDeer"],
     lesson: "At equilibrium the mating benefit of a bigger ornament exactly offsets its survival cost. Tune predation to hold the display steady at that balance point — the handicap principle in action.",
     build: (i, t, st) => ({
       desc: "Hold the display at a precise middling size. Mate choice keeps pushing it up; your hunters push it down. Find the predation pressure where the two forces balance and the ornament settles into the target window.",
@@ -265,7 +290,7 @@ const SEXUAL = buildMode("sexual", [
     }),
   },
   {
-    theme: "Strong Preference", traits: SEX_TRAITS,
+    theme: "Strong Preference", traits: SEX_TRAITS, examples: ["widowbird", "cichlid"],
     lesson: "When the taste for showy mates is intense, runaway is powerful — and only heavy, sustained natural selection can hold it in check without dooming the species.",
     build: (i, t, st) => ({
       desc: "Mate choice here is fierce, so the display rockets upward and resists being pushed down. It takes determined hunting to suppress it to target — but every hunter you add edges the small population closer to collapse. Walk the line.",
@@ -279,7 +304,7 @@ const SEXUAL = buildMode("sexual", [
     }),
   },
   {
-    theme: "Coevolution Gauntlet", traits: SEX_TRAITS,
+    theme: "Coevolution Gauntlet", traits: SEX_TRAITS, examples: ["guppy", "cichlid", "widowbird"],
     lesson: "Ornament and preference co-evolve as a linked pair. Steering one means wrestling the whole runaway system — the ultimate test of balancing two selective forces at once.",
     build: (i, t, st) => ({
       desc: "Everything at once: strong mate choice, pre-adapted prey, tight targets and unforgiving maps. Master the tug-of-war between sexual and natural selection to land the display exactly where it's needed.",
@@ -292,13 +317,27 @@ const SEXUAL = buildMode("sexual", [
         { trait: "ornament", value: 0.46, tolerance: lerp(0.15, 0.11, st), dir: "near", label: "≈46% display" }),
     }),
   },
+  {
+    theme: "The Cost of Beauty", traits: SEX_TRAITS, examples: ["guppy", "redDeer", "widowbird"],
+    lesson: "A showy ornament is costly two ways at once — it draws predators AND drains energy. Both natural-selection forces oppose the runaway, and you can wield either to find the balance.",
+    build: (i, t, st) => ({
+      desc: "Now the display is costly two ways: hunters spot it, and scarcity drains the energy it takes to grow. Use predation, starvation, or both to land the ornament in its target window without starving the species out.",
+      environmentHue: 205, path: PATH_CHICANE, mateChoice: true, choosiness: lerp(6, 7, st),
+      start: { ornament: { mean: 0.45, spread: 0.16 }, preference: { mean: 0.5, spread: 0.16 }, hue: { mean: 205, spread: 16 }, speed: { mean: 1.15, spread: 0.16 } },
+      popSize: ri(22, 26, st), generations: ri(14, 17, st),
+      startEnergy: ri(270, 310, st), incomePerGen: ri(130, 150, st),
+      allowedTowers: ["famine", "hawk", "frost", "claw"],
+      goal: shapeGoal(3, lerp(0.52, 0.6, st),
+        { trait: "ornament", value: 0.4, tolerance: lerp(0.15, 0.11, st), dir: "near", label: "≈40% display" }),
+    }),
+  },
 ]);
 
 export const LEVELS = [...EXTINCTION, ...SURVIVAL, ...SEXUAL];
 
 // Group boundaries for the level picker (optgroups).
 export const LEVEL_GROUPS = [
-  { label: "🛡️ Extinction (classic defense)", start: 0, count: 25 },
-  { label: "🌱 Survival (shape the species)", start: 25, count: 25 },
-  { label: "💃 Sexual selection (mate choice)", start: 50, count: 25 },
+  { label: "🛡️ Extinction (classic defense)", start: 0, count: 30 },
+  { label: "🌱 Survival (shape the species)", start: 30, count: 30 },
+  { label: "💃 Sexual selection (mate choice)", start: 60, count: 30 },
 ];
