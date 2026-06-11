@@ -41,10 +41,13 @@ export const TOWER_TYPES = {
     range: 130,
     fireRate: 1.3,
     damage: 34,
-    desc: "Spots prey that clash with the background. Camouflaged prey are nearly safe.",
-    selects: "Selects for body color matching the environment (camouflage).",
-    // Exposure = how far the prey's hue is from the environment hue.
-    damageFor: (c, env) => 34 * Math.min(1, hueDistance(c.genome.hue, env) / 110),
+    desc: "Spots prey that clash with the background — or that flaunt a showy display. Camouflaged, plain prey are nearly safe.",
+    selects: "Selects for body color matching the environment (camouflage), and against showy ornaments.",
+    // Exposure rises with color contrast against the background AND with display
+    // size. The display term is gentle so a hunter culls the showiest prey along a
+    // gradient rather than wiping a uniformly-ornamented population all at once.
+    damageFor: (c, env) =>
+      34 * Math.min(1, hueDistance(c.genome.hue, env) / 110 + c.genome.ornament * 0.6),
   },
   frost: {
     key: "frost",

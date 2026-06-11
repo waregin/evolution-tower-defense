@@ -1,14 +1,19 @@
 // ui.js — DOM side panels, the genetics charts, and all input handling.
-import { TRAITS, TRAIT_KEYS, meanTrait, hueColor } from "./genetics.js";
+import { TRAITS, meanTrait, hueColor } from "./genetics.js";
 import { TOWER_TYPES } from "./tower.js";
-import { LEVELS } from "./levels.js";
+import { LEVELS, LEVEL_GROUPS } from "./levels.js";
 
 const LINE_COLORS = {
   hue: "#e57bb0",
   speed: "#82aaff",
   armor: "#ffb454",
   toxinResistance: "#9b7bff",
+  ornament: "#ff5e9c",
+  preference: "#65e0c0",
 };
+
+// Which traits a level shows in its genetics panel.
+const shown = (lvl) => lvl.traits || ["hue", "speed", "armor", "toxinResistance"];
 
 export class UI {
   constructor() {
@@ -27,12 +32,17 @@ export class UI {
   _buildLevelOptions() {
     const sel = this.$("level-select");
     sel.innerHTML = "";
-    LEVELS.forEach((lvl, i) => {
-      const o = document.createElement("option");
-      o.value = i;
-      o.textContent = lvl.name;
-      sel.appendChild(o);
-    });
+    for (const grp of LEVEL_GROUPS) {
+      const og = document.createElement("optgroup");
+      og.label = grp.label;
+      for (let i = grp.start; i < grp.start + grp.count; i++) {
+        const o = document.createElement("option");
+        o.value = i;
+        o.textContent = LEVELS[i].name;
+        og.appendChild(o);
+      }
+      sel.appendChild(og);
+    }
   }
 
   // Called by main whenever a level is (re)loaded.
@@ -74,7 +84,7 @@ export class UI {
     wrap.innerHTML = "";
     this._traitCanvas = {};
     this._traitMean = {};
-    for (const key of TRAIT_KEYS) {
+    for (const key of shown(this.game.level)) {
       const t = TRAITS[key];
       const box = document.createElement("div");
       box.className = "trait-chart";
@@ -110,7 +120,7 @@ export class UI {
       livesVal.style.color = g.baseHealth <= 3 ? "var(--danger)" : "";
     } else {
       livesLabel.textContent = "Need through";
-      livesVal.textContent = `≥${lvl.survival.minSurvivors}`;
+      livesVal.textContent = `≥${lvl.goal.minSurvivors}`;
       livesVal.style.color = "";
     }
 
@@ -138,12 +148,16 @@ export class UI {
         <div class="muted" style="margin-top:6px">${lvl.lesson}</div>`;
       return;
     }
+    const goal = lvl.goal;
     const frac = g.goalProgress();
-    const need = lvl.survival.winFraction;
+    const need = goal.winFraction;
     const pct = Math.round(frac * 100);
     const fill = Math.min(100, (frac / need) * 100);
+    const intro = lvl.mode === "sexual"
+      ? `Keep the species alive (≥${goal.minSurvivors} through each generation) while the tug-of-war between mate choice and predation lands the display at <b>${goal.target.label}</b>.`
+      : `Keep the species alive (let ≥${goal.minSurvivors} through each generation) and breed it toward <b>${goal.target.label}</b>.`;
     box.innerHTML = `
-      <div><span class="goal-target">Goal:</span> Keep the species alive (let ≥${lvl.survival.minSurvivors} through each generation) and breed it toward <b>${lvl.survival.target.label}</b>.</div>
+      <div><span class="goal-target">Goal:</span> ${intro}</div>
       <div style="margin-top:6px">Population matching target: <b>${pct}%</b> <span class="muted">(need ${Math.round(need * 100)}%)</span></div>
       <div class="progress-track"><div class="progress-fill" style="width:${fill}%"></div></div>
       <div class="muted" style="margin-top:6px">${lvl.lesson}</div>`;
@@ -165,7 +179,7 @@ export class UI {
 
   _renderCharts() {
     const genomes = this.game.genomes;
-    for (const key of TRAIT_KEYS) {
+    for (const key of shown(this.game.level)) {
       this._traitMean[key].textContent = TRAITS[key].describe(meanTrait(genomes, key));
       this._drawHistogram(this._traitCanvas[key], key, genomes);
     }
@@ -186,8 +200,8 @@ export class UI {
     }
     const maxC = Math.max(1, ...counts);
 
-    // Target overlay (survival levels).
-    const target = this.game.level.survival?.target;
+    // Target overlay (survival / sexual shaping levels).
+    const target = this.game.level.goal?.target;
     if (target && target.trait === key) {
       ctx.fillStyle = "rgba(79,209,165,0.16)";
       if (target.dir === "above") {
@@ -238,7 +252,7 @@ export class UI {
     const plotH = H - pad.t - pad.b;
     const xFor = (i) => pad.l + (maxGen <= 1 ? 0 : (i / (maxGen - 1)) * plotW);
 
-    for (const key of TRAIT_KEYS) {
+    for (const key of shown(this.game.level)) {
       const t = TRAITS[key];
       ctx.strokeStyle = LINE_COLORS[key];
       ctx.lineWidth = 2;
@@ -260,7 +274,7 @@ export class UI {
     ctx.font = "10px sans-serif";
     ctx.textAlign = "left";
     let x = 6;
-    for (const key of TRAIT_KEYS) {
+    for (const key of shown(this.game.level)) {
       ctx.fillStyle = LINE_COLORS[key];
       ctx.fillRect(x, 4, 8, 8);
       ctx.fillStyle = "rgba(255,255,255,0.6)";
@@ -326,17 +340,19 @@ export class UI {
     this.$("modal-body").innerHTML = `
       <h2>🧬 How to play</h2>
       <p>This is a tower defense game about <b>evolution</b>. The critters on the path are <b>prey</b> carrying genes. The towers you place are <b>selection pressures</b> — predators and climate. Every prey that reaches the refuge survives to <b>reproduce</b>, passing its genes (with small mutations) to the next generation.</p>
-      <h3>The two modes</h3>
+      <h3>The three modes (25 levels each)</h3>
       <ul>
-        <li><b>Extinction</b> (classic defense): stop the prey. But survivors breed and adapt to whatever pressure you over-use — that's a predator–prey <b>arms race</b>. Win by surviving every generation or wiping the prey out.</li>
-        <li><b>Survival</b> (you are the environment): the species must <b>not</b> go extinct, so you have to let some prey through. By choosing <i>which</i> prey die, you steer the population's average traits toward a goal.</li>
+        <li><b>🛡️ Extinction</b> (classic defense): stop the prey. But survivors breed and adapt to whatever pressure you over-use — that's a predator–prey <b>arms race</b>. Win by surviving every generation or wiping the prey out.</li>
+        <li><b>🌱 Survival</b> (you are the environment): the species must <b>not</b> go extinct, so you have to let some prey through. By choosing <i>which</i> prey die, you steer the population's average traits toward a goal.</li>
+        <li><b>💃 Sexual selection</b> (mate choice): these prey breed by choosing showy mates, so a costly <b>display</b> ornament keeps growing on its own (<i>Fisherian runaway</i>). The visual hunter spots showy prey easily, so your predation is the only force that can push the display back down. Most levels are a tug-of-war: hit a target display size without driving the species extinct.</li>
       </ul>
       <h3>Traits &amp; their counters</h3>
       <ul>
         <li><b>🦅 Clawed predator</b> → blocked by <b>armor</b> (but armor slows prey down).</li>
         <li><b>🧪 Venom</b> → blocked by <b>toxin resistance</b>.</li>
-        <li><b>👁️ Visual hunter</b> → blocked by <b>color</b> matching the background (camouflage).</li>
+        <li><b>👁️ Visual hunter</b> → blocked by <b>color</b> matching the background (camouflage), and it easily spots big <b>displays</b>.</li>
         <li><b>❄️ Cold snap</b> → no damage, just slows prey so other pressures get more shots.</li>
+        <li><b>💃 Display / Mate choice</b> (sexual mode): a showy ornament wins matings but makes prey conspicuous and slow; the preference for showy mates is itself inherited, driving runaway.</li>
       </ul>
       <h3>Controls</h3>
       <ul>

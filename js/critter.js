@@ -25,10 +25,11 @@ export class Critter {
     this.flash = 0;          // hit flash timer
   }
 
-  // Armor makes prey heavier and therefore slower — the core trade-off.
+  // Armor and a big display both weigh prey down — the core trade-offs.
   effectiveSpeed() {
     const armorPenalty = 1 - this.genome.armor * 0.5;
-    return this.genome.speed * armorPenalty * this.slowFactor;
+    const ornamentPenalty = 1 - this.genome.ornament * 0.22;
+    return this.genome.speed * armorPenalty * ornamentPenalty * this.slowFactor;
   }
 
   applyPoison(dps, duration) {
@@ -107,6 +108,25 @@ export class Critter {
       ctx.beginPath();
       ctx.arc(this.x, this.y, r + 4, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
+    }
+
+    // Showy ornament: a bright plume trailing behind the body.
+    if (g.ornament > 0.08) {
+      const len = 6 + g.ornament * 22;
+      // Point the plume roughly backward along travel.
+      const ahead = this.path[Math.min(this.seg + 1, this.path.length - 1)];
+      let dx = this.x - ahead.x, dy = this.y - ahead.y;
+      const m = Math.hypot(dx, dy) || 1; dx /= m; dy /= m;
+      ctx.save();
+      ctx.strokeStyle = hueColor((g.hue + 180) % 360, 90, 62);
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = 2 + g.ornament * 4;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(this.x + dx * len, this.y + dy * len);
+      ctx.stroke();
       ctx.restore();
     }
 
