@@ -2,8 +2,9 @@
 import { Critter } from "./critter.js";
 import { Tower, TOWER_TYPES } from "./tower.js";
 import {
-  TRAITS, TRAIT_KEYS, randomGenome, breed, meanTrait, hueDistance, hueColor,
+  TRAITS, TRAIT_KEYS, randomGenome, breed, meanTrait, hueDistance, hueColor, weightedIndex,
 } from "./genetics.js";
+import { getExample } from "./examples.js";
 
 const GRID = { cols: 20, rows: 15, cell: 40 };
 const SPEEDS = [1, 2, 4];
@@ -40,8 +41,10 @@ export class Game {
     this.state = "idle";      // idle | running | won | lost
     this.result = null;
     this.selectedTower = null;
+    this.sellMode = false;
 
     this._computeBlocked();
+    this._placePreset(level.preplaced);
     // Note: no _emit() here — the UI rebuilds this level's panels in
     // onLevelLoaded() and renders itself. Emitting now would render against
     // the previous level's tower buttons.
@@ -64,6 +67,20 @@ export class Game {
     }
   }
 
+  // Pre-place pressures the level starts with. They are normal towers the player
+  // can sell or build around — the point is to give an existing force to manage.
+  _placePreset(preset) {
+    if (!preset) return;
+    for (const p of preset) {
+      const x = p.col * GRID.cell + GRID.cell / 2;
+      const y = p.row * GRID.cell + GRID.cell / 2;
+      const t = new Tower(p.type, x, y);
+      t.col = p.col; t.row = p.row;
+      this.towers.push(t);
+      this.occupied.add(`${p.col},${p.row}`);
+    }
+  }
+
   // ---- generations --------------------------------------------------------
   startGeneration() {
     if (this.state !== "idle") return;
@@ -79,28 +96,31 @@ export class Game {
     this._emit();
   }
 
+  // Extinction levels track a base; survival and sexual levels share a "shaping"
+  // goal (keep the species alive while steering a trait toward a target).
+  get isShaping() { return this.level.mode !== "extinction"; }
+
   endGeneration() {
     // Record the distribution of the generation that just lived.
     const means = {};
     for (const k of TRAIT_KEYS) means[k] = meanTrait(this.genomes, k);
-    const fraction = this.level.mode === "survival"
-      ? this._fractionMeetingTarget(this.genomes)
-      : null;
+    const fraction = this.isShaping ? this._fractionMeetingTarget(this.genomes) : null;
     this.stats.push({ gen: this.gen, means, survivors: this.survivors.length, fraction });
     this.lastSurvivors = this.survivors.length;
 
     this._announceShift();
 
     const lvl = this.level;
-    if (lvl.mode === "extinction") {
+    if (!this.isShaping) {
       if (this.baseHealth <= 0) return this._finish(false, "Your base was overrun. Too many prey broke through.");
       if (this.survivors.length === 0) return this._finish(true, "Extinction achieved — no prey survived to reproduce.");
       if (this.gen >= lvl.generations) return this._finish(true, "You held the line for every generation. Defense successful.");
     } else {
-      const met = fraction >= lvl.survival.winFraction && this.survivors.length >= lvl.survival.minSurvivors;
-      if (this.survivors.length < lvl.survival.minSurvivors)
-        return this._finish(false, `Only ${this.survivors.length} prey survived — below the ${lvl.survival.minSurvivors} needed. The species collapsed.`);
-      if (met) return this._finish(true, `The population reached your target: ${lvl.survival.target.label}.`);
+      const goal = lvl.goal;
+      const met = fraction >= goal.winFraction && this.survivors.length >= goal.minSurvivors;
+      if (this.survivors.length < goal.minSurvivors)
+        return this._finish(false, `Only ${this.survivors.length} prey survived — below the ${goal.minSurvivors} needed. The species collapsed.`);
+      if (met) return this._finish(true, `The population reached your target: ${goal.target.label}.`);
       if (this.gen >= lvl.generations) return this._finish(false, "Out of generations before the population reached the target trait.");
     }
 
@@ -110,20 +130,41 @@ export class Game {
     this._emit();
   }
 
+  // Breed the next generation from the survivors. With mate choice on, showy
+  // maters win the most matings: BOTH parents are drawn preferentially by their
+  // display, and the strength of that bias scales with the population's evolved
+  // mate preference. This assortative mating drags the ornament up toward a high
+  // equilibrium (Fisherian runaway) until predation makes the display too costly.
   _breedNext() {
     const pool = this.survivors;
     const next = [];
-    for (let i = 0; i < this.level.popSize; i++) {
-      const a = pool[Math.floor(Math.random() * pool.length)];
-      let b = pool[Math.floor(Math.random() * pool.length)];
-      if (pool.length > 1 && b === a) b = pool[(pool.indexOf(a) + 1) % pool.length];
-      next.push(breed(a, b));
+
+    if (this.level.mateChoice && pool.length > 1) {
+      const choosiness = this.level.choosiness ?? 6;
+      let meanPref = 0;
+      for (const p of pool) meanPref += p.preference;
+      meanPref /= pool.length;
+      const exp = 1 + choosiness * meanPref;
+      let total = 0;
+      const w = pool.map((p) => { const x = Math.pow(0.04 + p.ornament, exp); total += x; return x; });
+      for (let i = 0; i < this.level.popSize; i++) {
+        const dam = pool[weightedIndex(w, total)];
+        const sire = pool[weightedIndex(w, total)];
+        next.push(breed(dam, sire));
+      }
+    } else {
+      for (let i = 0; i < this.level.popSize; i++) {
+        const a = pool[Math.floor(Math.random() * pool.length)];
+        let b = pool[Math.floor(Math.random() * pool.length)];
+        if (pool.length > 1 && b === a) b = pool[(pool.indexOf(a) + 1) % pool.length];
+        next.push(breed(a, b));
+      }
     }
     this.genomes = next;
   }
 
   _fractionMeetingTarget(genomes) {
-    const t = this.level.survival.target;
+    const t = this.level.goal.target;
     let n = 0;
     for (const g of genomes) {
       const v = g[t.trait];
@@ -138,7 +179,7 @@ export class Game {
   }
 
   goalProgress() {
-    if (this.level.mode !== "survival") return null;
+    if (!this.isShaping) return null;
     return this._fractionMeetingTarget(this.genomes);
   }
 
@@ -152,15 +193,20 @@ export class Game {
       toxinResistance: ["Toxin resistance is rising", "Prey that shrugged off venom are breeding. Pure poison is losing its bite."],
       speed: ["Prey are getting faster", "Faster survivors are passing on speed — they spend less time in your kill zones."],
       hue: ["Camouflage is evolving", "Body color is shifting toward the background. Your visual hunter is training the prey to hide."],
+      ornament: ["Runaway is underway", "Showy maters are winning the most matings, so the display keeps growing — even though it makes prey easier to catch. That's Fisherian runaway."],
+      preference: ["Choosiness is spreading", "A taste for showy mates is itself being inherited, which pushes the ornament up even faster — preference and display co-evolve."],
     };
+    const scan = this.level.mode === "sexual"
+      ? ["ornament", "preference", "speed"]
+      : ["armor", "toxinResistance", "speed"];
     let bestKey = null, bestDelta = 0;
-    for (const k of ["armor", "toxinResistance", "speed"]) {
+    for (const k of scan) {
       const d = cur[k] - prev[k];
       if (d > bestDelta) { bestDelta = d; bestKey = k; }
     }
     const hueShift = hueDistance(cur.hue, prev.hue);
-    if (hueShift > 12 && hueShift > bestDelta * 100) bestKey = "hue";
-    const thresh = { armor: 0.05, toxinResistance: 0.05, speed: 0.08, hue: 12 };
+    if (this.level.mode !== "sexual" && hueShift > 12 && hueShift > bestDelta * 100) bestKey = "hue";
+    const thresh = { armor: 0.05, toxinResistance: 0.05, speed: 0.08, hue: 12, ornament: 0.05, preference: 0.05 };
     if (bestKey && (bestKey === "hue" ? hueShift : bestDelta) >= thresh[bestKey]) {
       const [title, body] = msgs[bestKey];
       this.hooks.onTip?.(title, body);
@@ -169,15 +215,100 @@ export class Game {
 
   _finish(won, message) {
     this.state = won ? "won" : "lost";
-    this.result = { won, message };
+    const outcome = this._computeOutcome(won);
+    this.result = {
+      won, message,
+      stars: outcome.stars,
+      score: outcome.score,
+      breakdown: outcome.breakdown,
+      recap: this._recap(),
+      example: getExample(this.level.example),
+      generations: this.gen,
+    };
     this._emit();
     this.hooks.onEnd?.(this.result);
+  }
+
+  // Star rating (0–3). Shaping levels reward precise, fast selection — letting
+  // only just enough prey through, per the original design note that excess
+  // survivors mean weak selection. Extinction rewards a healthy base / a clean
+  // wipe-out. Both reward finishing in fewer generations.
+  _computeOutcome(won) {
+    const lvl = this.level;
+    const c01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+    const speed = lvl.generations > 1 ? c01(1 - (this.gen - 1) / (lvl.generations - 1)) : 1;
+    const breakdown = [];
+    let eff;
+
+    if (!this.isShaping) {
+      const baseFrac = this.maxBaseHealth ? this.baseHealth / this.maxBaseHealth : 1;
+      const extinct = this.survivors.length === 0;
+      eff = extinct ? 1 : 0.65 * baseFrac + 0.35 * speed;
+      breakdown.push(["Base intact", `${Math.round(baseFrac * 100)}%`]);
+      breakdown.push(["Generations", `${this.gen}/${lvl.generations}`]);
+      if (extinct) breakdown.push(["Outcome", "prey driven fully extinct"]);
+    } else {
+      const goal = lvl.goal;
+      const isCull = goal.target.dir !== "above";
+      let precision = 1;
+      if (isCull && this.stats.length) {
+        let sum = 0;
+        for (const st of this.stats) sum += Math.max(0, st.survivors - goal.minSurvivors);
+        const avg = sum / this.stats.length;
+        const denom = Math.max(1, lvl.popSize - goal.minSurvivors);
+        precision = 1 - c01(avg / denom);
+      }
+      eff = isCull ? 0.55 * precision + 0.45 * speed : speed;
+      breakdown.push(["Generations", `${this.gen}/${lvl.generations}`]);
+      if (isCull) breakdown.push(["Selection tightness", `${Math.round(precision * 100)}%`]);
+    }
+
+    const stars = !won ? 0 : eff >= 0.66 ? 3 : eff >= 0.33 ? 2 : 1;
+    return { stars, score: Math.round(eff * 1000), breakdown };
+  }
+
+  // A short "what your population did" summary: the goal trait plus the biggest
+  // movers, from the founding generation to the last.
+  _recap() {
+    if (this.stats.length < 1) return [];
+    const first = this.stats[0].means;
+    const last = this.stats[this.stats.length - 1].means;
+    const focus = this.isShaping ? this.level.goal.target.trait : null;
+    const norm = (k, v) => (TRAITS[k].wrap ? v / 360 : (v - TRAITS[k].min) / (TRAITS[k].max - TRAITS[k].min));
+    const movers = this.level.traits
+      .map((k) => {
+        const d = TRAITS[k].wrap ? hueDistance(first[k], last[k]) / 180 : Math.abs(norm(k, last[k]) - norm(k, first[k]));
+        return { k, d };
+      })
+      .sort((a, b) => b.d - a.d);
+    const order = [];
+    if (focus) order.push(focus);
+    for (const m of movers) if (m.k !== focus && m.d > 0.07 && order.length < 3) order.push(m.k);
+    return order.map((k) => ({
+      key: k,
+      label: TRAITS[k].label,
+      from: TRAITS[k].describe(first[k]),
+      to: TRAITS[k].describe(last[k]),
+    }));
   }
 
   // ---- player actions -----------------------------------------------------
   selectTowerType(type) {
     this.selectedTower = this.selectedTower === type ? null : type;
+    if (this.selectedTower) this.sellMode = false;
     this._emit();
+  }
+
+  toggleSellMode() {
+    this.sellMode = !this.sellMode;
+    if (this.sellMode) this.selectedTower = null;
+    this._emit();
+  }
+
+  // A tap/click on the board: sell if in sell mode, otherwise place.
+  tapBoard(px, py) {
+    if (this.sellMode) this.sellAt(px, py);
+    else this.placeTower(px, py);
   }
 
   cellAt(px, py) {

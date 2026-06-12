@@ -41,10 +41,13 @@ export const TOWER_TYPES = {
     range: 130,
     fireRate: 1.3,
     damage: 34,
-    desc: "Spots prey that clash with the background. Camouflaged prey are nearly safe.",
-    selects: "Selects for body color matching the environment (camouflage).",
-    // Exposure = how far the prey's hue is from the environment hue.
-    damageFor: (c, env) => 34 * Math.min(1, hueDistance(c.genome.hue, env) / 110),
+    desc: "Spots prey that clash with the background — or that flaunt a showy display. Camouflaged, plain prey are nearly safe.",
+    selects: "Selects for body color matching the environment (camouflage), and against showy ornaments.",
+    // Exposure rises with color contrast against the background AND with display
+    // size. The display term is gentle so a hunter culls the showiest prey along a
+    // gradient rather than wiping a uniformly-ornamented population all at once.
+    damageFor: (c, env) =>
+      34 * Math.min(1, hueDistance(c.genome.hue, env) / 110 + c.genome.ornament * 0.6),
   },
   frost: {
     key: "frost",
@@ -59,6 +62,20 @@ export const TOWER_TYPES = {
     desc: "Climate pressure. Slows nearby prey (no damage), exposing them longer.",
     selects: "An environmental tool — pairs well with damaging pressures.",
     damageFor: () => 0,
+  },
+  famine: {
+    key: "famine",
+    name: "Scarcity",
+    icon: "🍂",
+    color: "#caa86a",
+    cost: 60,
+    range: 105,
+    fireRate: 0,
+    damage: 0,
+    drain: 14, // damage per second at full burden (armor + display = 1)
+    desc: "Resource scarcity. Drains prey burdened by heavy armor or a showy display — lean, plain prey barely feel it.",
+    selects: "Selects AGAINST costly traits (armor, display): drives them to shrink or be lost.",
+    damageFor: (c) => 14 * (c.genome.armor + c.genome.ornament),
   },
 };
 
@@ -81,10 +98,22 @@ export class Tower {
   update(dt, critters, env) {
     const def = this.def;
 
-    // Frost: continuous aura, no targeting.
+    // Frost: continuous slowing aura, no targeting.
     if (def.slow) {
       for (const c of critters) {
         if (c.alive && this.inRange(c)) c.applySlow(def.slow, 0.25);
+      }
+      return;
+    }
+
+    // Famine: continuous draining aura; damage scales with the prey's burden
+    // (armor + display), so it punishes costly traits and spares lean prey.
+    if (def.drain) {
+      for (const c of critters) {
+        if (c.alive && !c.escaped && this.inRange(c)) {
+          const burden = c.genome.armor + c.genome.ornament;
+          if (burden > 0) c.hit(def.drain * burden * dt, "famine");
+        }
       }
       return;
     }
