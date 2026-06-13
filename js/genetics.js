@@ -132,6 +132,41 @@ export function hueColor(h, sat = 68, light = 55) {
   return `hsl(${Math.round(h)}, ${sat}%, ${light}%)`;
 }
 
+// Circular variance of a wrapping trait (hue), in [0, 1]: 0 = the whole
+// population shares one value (fixed), ~1 = spread evenly around the circle.
+// Used as the "genetic diversity" readout for the drift and speciation modes.
+export function circularVariance(genomes, key = "hue") {
+  if (!genomes.length) return 0;
+  let sx = 0, sy = 0;
+  for (const g of genomes) {
+    const r = (g[key] * Math.PI) / 180;
+    sx += Math.cos(r); sy += Math.sin(r);
+  }
+  return 1 - Math.hypot(sx, sy) / genomes.length;
+}
+
+// Detect whether a hue population has split into two well-separated clusters.
+// Finds the two largest gaps around the colour circle (which carve the points
+// into two arcs); a split needs both gaps wide and both arcs populated.
+export function hueClusters(genomes, minGapDeg = 48, minFrac = 0.25) {
+  const n = genomes.length;
+  if (n < 4) return { split: false, quality: 0, sizes: [n, 0], sep: 0 };
+  const hues = genomes.map((g) => g.hue).sort((a, b) => a - b);
+  let g1 = { d: -1, after: 0 }, g2 = { d: -1, after: 0 };
+  for (let i = 0; i < n; i++) {
+    const d = ((hues[(i + 1) % n] - hues[i]) % 360 + 360) % 360;
+    if (d > g1.d) { g2 = g1; g1 = { d, after: i }; }
+    else if (d > g2.d) { g2 = { d, after: i }; }
+  }
+  const lo = Math.min(g1.after, g2.after), hi = Math.max(g1.after, g2.after);
+  const sizeA = hi - lo, sizeB = n - sizeA;
+  const minSize = Math.min(sizeA, sizeB);
+  const sep = g2.d; // the smaller of the two big gaps
+  const split = sep >= minGapDeg && minSize >= minFrac * n;
+  const quality = Math.min(1, sep / 120) * Math.min(1, minSize / (minFrac * n));
+  return { split, quality, sizes: [sizeA, sizeB], sep };
+}
+
 // Population-level mean for a trait. Hue is averaged on the circle.
 export function meanTrait(genomes, key) {
   if (genomes.length === 0) return 0;

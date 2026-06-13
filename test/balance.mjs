@@ -82,13 +82,18 @@ function strategies(lvl) {
     const sel = tr.trait === "toxinResistance" ? "venom"
       : tr.trait === "armor" ? (tr.dir === "below" ? "famine" : "claw") : "hawk";
     for (const k of [2, 3, 4, 5]) S.push({ mix: [{ t: sel, k }] });
-  } else { // sexual
+  } else if (lvl.mode === "sexual") {
     const tr = lvl.goal.target;
     if (tr.dir === "above") { S.push({ mix: [], sell: true }); S.push({ mix: [] }); }
     else {
       const tools = has("famine") ? ["hawk", "famine"] : ["hawk"];
       for (const tw of tools) for (const k of [2, 3, 4]) S.push({ mix: [{ t: tw, k }] });
     }
+  } else if (lvl.mode === "drift") {
+    const tw = lvl.goal.kind === "fixation" ? "disaster" : "sanctuary";
+    for (const k of [1, 2, 3, 4]) S.push({ mix: [{ t: tw, k }] });
+  } else if (lvl.mode === "speciation") {
+    for (const k of [2, 3, 4]) S.push({ mix: [{ t: "rift", k }] });
   }
   return S;
 }
@@ -105,17 +110,21 @@ function isWinnable(idx) {
 const failures = [];
 const expect = (cond, msg) => { if (!cond) failures.push(msg); };
 
-expect(LEVELS.length === 90, `expected 90 levels, got ${LEVELS.length}`);
+const EXPECT_COUNTS = { extinction: 30, survival: 30, sexual: 30, drift: 15, speciation: 15 };
+const EXPECT_TOTAL = Object.values(EXPECT_COUNTS).reduce((a, b) => a + b, 0);
+expect(LEVELS.length === EXPECT_TOTAL, `expected ${EXPECT_TOTAL} levels, got ${LEVELS.length}`);
 const counts = {};
 for (const l of LEVELS) counts[l.mode] = (counts[l.mode] || 0) + 1;
-for (const m of ["extinction", "survival", "sexual"]) expect(counts[m] === 30, `expected 30 ${m} levels, got ${counts[m]}`);
-expect(LEVEL_GROUPS.reduce((a, g) => a + g.count, 0) === 90, "level groups must cover 90 levels");
+for (const m of Object.keys(EXPECT_COUNTS)) expect(counts[m] === EXPECT_COUNTS[m], `expected ${EXPECT_COUNTS[m]} ${m} levels, got ${counts[m]}`);
+expect(LEVEL_GROUPS.reduce((a, g) => a + g.count, 0) === EXPECT_TOTAL, `level groups must cover ${EXPECT_TOTAL} levels`);
 
 // Structure + example sourcing.
 for (const l of LEVELS) {
   for (const f of ["id", "mode", "name", "desc", "lesson", "path", "popSize", "generations", "allowedTowers", "traits", "example"])
     expect(l[f] != null, `${l.id}: missing field ${f}`);
   if (l.mode === "extinction") expect(l.extinction?.baseHealth > 0, `${l.id}: bad extinction config`);
+  else if (l.mode === "drift") expect(l.goal?.kind && l.goal.threshold != null, `${l.id}: bad drift goal`);
+  else if (l.mode === "speciation") expect(l.goal?.kind === "split", `${l.id}: bad speciation goal`);
   else expect(l.goal?.target && l.goal.minSurvivors > 0, `${l.id}: bad goal config`);
   const ex = EXAMPLES[l.example];
   expect(ex && ex.source && ex.source.cite && ex.source.url, `${l.id}: example '${l.example}' missing or unsourced`);

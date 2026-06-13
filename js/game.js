@@ -3,8 +3,11 @@ import { Critter } from "./critter.js";
 import { Tower, TOWER_TYPES } from "./tower.js";
 import {
   TRAITS, TRAIT_KEYS, randomGenome, breed, meanTrait, hueDistance, hueColor, weightedIndex,
+  circularVariance, hueClusters,
 } from "./genetics.js";
 import { getExample } from "./examples.js";
+
+const REFUGE_PER = 6; // extra founding-diversity breeders re-seeded by each Refuge
 
 const GRID = { cols: 20, rows: 15, cell: 40 };
 const SPEEDS = [1, 2, 4];
@@ -28,6 +31,8 @@ export class Game {
     this.env = level.environmentHue;
 
     this.genomes = Array.from({ length: level.popSize }, () => randomGenome(level.start));
+    this.foundingPool = this.genomes.slice(); // diversity reservoir for Refuges (drift)
+    this._splitStreak = 0;                     // consecutive split generations (speciation)
     this.towers = [];
     this.critters = [];
     this.occupied = new Set();
@@ -96,32 +101,63 @@ export class Game {
     this._emit();
   }
 
-  // Extinction levels track a base; survival and sexual levels share a "shaping"
-  // goal (keep the species alive while steering a trait toward a target).
-  get isShaping() { return this.level.mode !== "extinction"; }
+  // Modes fall into four families with different win rules:
+  //  defense (extinction) · shaping (survival, sexual) · drift · speciation.
+  get category() {
+    const m = this.level.mode;
+    if (m === "extinction") return "defense";
+    if (m === "drift") return "drift";
+    if (m === "speciation") return "speciation";
+    return "shaping";
+  }
+  get isShaping() { return this.category === "shaping"; }
 
   endGeneration() {
+    const cat = this.category;
     // Record the distribution of the generation that just lived.
     const means = {};
     for (const k of TRAIT_KEYS) means[k] = meanTrait(this.genomes, k);
-    const fraction = this.isShaping ? this._fractionMeetingTarget(this.genomes) : null;
-    this.stats.push({ gen: this.gen, means, survivors: this.survivors.length, fraction });
+    const fraction = cat === "shaping" ? this._fractionMeetingTarget(this.genomes) : null;
+    const diversity = (cat === "drift" || cat === "speciation") ? circularVariance(this.genomes, "hue") : null;
+    const split = cat === "speciation" ? hueClusters(this.genomes) : null;
+    this.stats.push({ gen: this.gen, means, survivors: this.survivors.length, fraction, diversity, split });
     this.lastSurvivors = this.survivors.length;
 
     this._announceShift();
 
     const lvl = this.level;
-    if (!this.isShaping) {
+    if (cat === "defense") {
       if (this.baseHealth <= 0) return this._finish(false, "Your base was overrun. Too many prey broke through.");
       if (this.survivors.length === 0) return this._finish(true, "Extinction achieved — no prey survived to reproduce.");
       if (this.gen >= lvl.generations) return this._finish(true, "You held the line for every generation. Defense successful.");
-    } else {
+    } else if (cat === "shaping") {
       const goal = lvl.goal;
       const met = fraction >= goal.winFraction && this.survivors.length >= goal.minSurvivors;
       if (this.survivors.length < goal.minSurvivors)
         return this._finish(false, `Only ${this.survivors.length} prey survived — below the ${goal.minSurvivors} needed. The species collapsed.`);
       if (met) return this._finish(true, `The population reached your target: ${goal.target.label}.`);
       if (this.gen >= lvl.generations) return this._finish(false, "Out of generations before the population reached the target trait.");
+    } else if (cat === "drift") {
+      const goal = lvl.goal;
+      if (this.survivors.length === 0) return this._finish(false, "The population died out entirely — that's extinction, not drift.");
+      if (goal.kind === "fixation") {
+        if (diversity <= goal.threshold) return this._finish(true, "Drift fixed the population on one colour — by pure chance, no selection. Replay and a different colour may win.");
+        if (this.gen >= lvl.generations) return this._finish(false, "The colour never fixed — your population stayed too large for drift to take hold. Shrink it.");
+      } else { // diversity / conservation — judged at the end, so a dip during a
+               // bottleneck can be recovered from with Refuges before time is up.
+        if (this.gen >= lvl.generations) {
+          return diversity >= goal.threshold
+            ? this._finish(true, "You carried the population's diversity through every bottleneck. Conservation success.")
+            : this._finish(false, "Genetic diversity collapsed below the safe line — drift hollowed out the gene pool.");
+        }
+      }
+    } else { // speciation
+      const goal = lvl.goal;
+      if (this.survivors.length < (goal.minSurvivors || 4))
+        return this._finish(false, `Only ${this.survivors.length} survived — the population collapsed before it could split.`);
+      this._splitStreak = split.split ? this._splitStreak + 1 : 0;
+      if (this._splitStreak >= 2) return this._finish(true, "Two separated colour forms that no longer interbreed — one population has become two.");
+      if (this.gen >= lvl.generations) return this._finish(false, "Time ran out before the population split into two distinct, isolated clusters.");
     }
 
     // Breed the next generation from this generation's survivors.
@@ -136,6 +172,10 @@ export class Game {
   // mate preference. This assortative mating drags the ornament up toward a high
   // equilibrium (Fisherian runaway) until predation makes the display too costly.
   _breedNext() {
+    const cat = this.category;
+    if (cat === "drift") return this._breedDrift();
+    if (cat === "speciation") return this._breedSpeciation();
+
     const pool = this.survivors;
     const next = [];
 
@@ -163,6 +203,53 @@ export class Game {
     this.genomes = next;
   }
 
+  // Drift: random mating among survivors (no selection). A small survivor pool
+  // means strong sampling error → drift. Scripted bottlenecks shrink the pool;
+  // Refuges re-seed it from the founding diversity reservoir.
+  _breedDrift() {
+    let pool = this.survivors.slice();
+    const bn = this.level.bottlenecks?.find((b) => b.atGen === this.gen);
+    if (bn && pool.length > bn.keep) {
+      for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+      pool = pool.slice(0, bn.keep);
+    }
+    const refuges = this.towers.reduce((n, t) => n + (t.type === "sanctuary" ? 1 : 0), 0);
+    for (let i = 0; i < refuges * REFUGE_PER; i++) {
+      pool.push(this.foundingPool[Math.floor(Math.random() * this.foundingPool.length)]);
+    }
+    const next = [];
+    for (let i = 0; i < this.level.popSize; i++) {
+      const a = pool[Math.floor(Math.random() * pool.length)];
+      const b = pool[Math.floor(Math.random() * pool.length)];
+      next.push(breed(a, b));
+    }
+    this.genomes = next;
+  }
+
+  // Speciation: assortative mating — each parent mates preferentially with a
+  // colour-similar partner, so once disruptive selection carves out the middle
+  // the two emerging forms stop interbreeding.
+  _breedSpeciation() {
+    const pool = this.survivors;
+    const a = this.level.assortment ?? 8;
+    const next = [];
+    for (let i = 0; i < this.level.popSize; i++) {
+      const dam = pool[Math.floor(Math.random() * pool.length)];
+      let sire = dam;
+      if (pool.length > 1) {
+        let total = 0;
+        const w = pool.map((p) => {
+          const d = hueDistance(dam.hue, p.hue) / 180;
+          const x = Math.exp(-a * d * d);
+          total += x; return x;
+        });
+        sire = pool[weightedIndex(w, total)];
+      }
+      next.push(breed(dam, sire));
+    }
+    this.genomes = next;
+  }
+
   _fractionMeetingTarget(genomes) {
     const t = this.level.goal.target;
     let n = 0;
@@ -178,10 +265,22 @@ export class Game {
     return genomes.length ? n / genomes.length : 0;
   }
 
+  // 0..1 progress toward the level's win condition, for the UI bar.
   goalProgress() {
-    if (!this.isShaping) return null;
-    return this._fractionMeetingTarget(this.genomes);
+    const cat = this.category;
+    if (cat === "shaping") return this._fractionMeetingTarget(this.genomes);
+    if (cat === "drift") {
+      const div = circularVariance(this.genomes, "hue");
+      return this.level.goal.kind === "fixation"
+        ? Math.max(0, Math.min(1, 1 - div / Math.max(0.01, this.level.goal.threshold)))
+        : Math.max(0, Math.min(1, div / this.level.goal.threshold));
+    }
+    if (cat === "speciation") return hueClusters(this.genomes).quality;
+    return null;
   }
+
+  // Live diversity readout (drift/speciation), for the goal panel.
+  diversity() { return circularVariance(this.genomes, "hue"); }
 
   // Surface a teaching tip when a trait shifts noticeably between generations.
   _announceShift() {
@@ -196,6 +295,17 @@ export class Game {
       ornament: ["Runaway is underway", "Showy maters are winning the most matings, so the display keeps growing — even though it makes prey easier to catch. That's Fisherian runaway."],
       preference: ["Choosiness is spreading", "A taste for showy mates is itself being inherited, which pushes the ornament up even faster — preference and display co-evolve."],
     };
+    const cat = this.category;
+    if (cat === "drift") {
+      const d0 = this.stats[this.stats.length - 2].diversity, d1 = this.stats[this.stats.length - 1].diversity;
+      if (d1 != null && d0 - d1 > 0.12) this.hooks.onTip?.("Diversity is draining away", "With so few breeders, allele frequencies are lurching at random — that's drift, and it's eroding the gene pool.");
+      return;
+    }
+    if (cat === "speciation") {
+      const s = this.stats[this.stats.length - 1].split;
+      if (s && s.sep > 35 && this._splitStreak < 2) this.hooks.onTip?.("The population is pulling apart", "Disruptive selection is emptying the middle and assortative mating keeps the extremes from blending — two forms are emerging.");
+      return;
+    }
     const scan = this.level.mode === "sexual"
       ? ["ornament", "preference", "speed"]
       : ["armor", "toxinResistance", "speed"];
@@ -237,17 +347,18 @@ export class Game {
     const lvl = this.level;
     const c01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
     const speed = lvl.generations > 1 ? c01(1 - (this.gen - 1) / (lvl.generations - 1)) : 1;
+    const cat = this.category;
     const breakdown = [];
     let eff;
 
-    if (!this.isShaping) {
+    if (cat === "defense") {
       const baseFrac = this.maxBaseHealth ? this.baseHealth / this.maxBaseHealth : 1;
       const extinct = this.survivors.length === 0;
       eff = extinct ? 1 : 0.65 * baseFrac + 0.35 * speed;
       breakdown.push(["Base intact", `${Math.round(baseFrac * 100)}%`]);
       breakdown.push(["Generations", `${this.gen}/${lvl.generations}`]);
       if (extinct) breakdown.push(["Outcome", "prey driven fully extinct"]);
-    } else {
+    } else if (cat === "shaping") {
       const goal = lvl.goal;
       const isCull = goal.target.dir !== "above";
       let precision = 1;
@@ -261,6 +372,22 @@ export class Game {
       eff = isCull ? 0.55 * precision + 0.45 * speed : speed;
       breakdown.push(["Generations", `${this.gen}/${lvl.generations}`]);
       if (isCull) breakdown.push(["Selection tightness", `${Math.round(precision * 100)}%`]);
+    } else if (cat === "drift") {
+      const finalDiv = this.stats.length ? this.stats[this.stats.length - 1].diversity : 0;
+      if (lvl.goal.kind === "fixation") {
+        eff = speed; // faster fixation = stronger bottleneck = more stars
+        breakdown.push(["Generations to fix", `${this.gen}/${lvl.generations}`]);
+      } else {
+        eff = c01(finalDiv / 0.8); // more diversity retained = more stars
+        breakdown.push(["Diversity kept", `${Math.round(finalDiv * 100)}%`]);
+        breakdown.push(["Generations", `${this.gen}/${lvl.generations}`]);
+      }
+    } else { // speciation
+      const last = this.stats[this.stats.length - 1]?.split;
+      const q = last ? last.quality : 0;
+      eff = 0.5 * speed + 0.5 * q;
+      breakdown.push(["Generations", `${this.gen}/${lvl.generations}`]);
+      breakdown.push(["Split clarity", `${Math.round(q * 100)}%`]);
     }
 
     const stars = !won ? 0 : eff >= 0.66 ? 3 : eff >= 0.33 ? 2 : 1;
@@ -271,8 +398,19 @@ export class Game {
   // movers, from the founding generation to the last.
   _recap() {
     if (this.stats.length < 1) return [];
-    const first = this.stats[0].means;
-    const last = this.stats[this.stats.length - 1].means;
+    const cat = this.category;
+    const s0 = this.stats[0], s1 = this.stats[this.stats.length - 1];
+    if (cat === "drift") {
+      return [{ label: "Colour diversity", from: `${Math.round((s0.diversity ?? 0) * 100)}%`, to: `${Math.round((s1.diversity ?? 0) * 100)}%` }];
+    }
+    if (cat === "speciation") {
+      return [
+        { label: "Distinct forms", from: "1", to: s1.split && s1.split.split ? "2" : "1" },
+        { label: "Colour diversity", from: `${Math.round((s0.diversity ?? 0) * 100)}%`, to: `${Math.round((s1.diversity ?? 0) * 100)}%` },
+      ];
+    }
+    const first = s0.means;
+    const last = s1.means;
     const focus = this.isShaping ? this.level.goal.target.trait : null;
     const norm = (k, v) => (TRAITS[k].wrap ? v / 360 : (v - TRAITS[k].min) / (TRAITS[k].max - TRAITS[k].min));
     const movers = this.level.traits

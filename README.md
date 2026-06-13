@@ -1,9 +1,10 @@
 # 🧬 Evolution Tower Defense
 
 A tower defense game that teaches **evolution** — natural selection, heredity,
-the predator–prey **arms race**, **sexual selection**, and the loss of costly
-traits — by letting you *be* the selection pressure. Three modes, **30 levels each
-(90 total)**, every level ending with the real-world species and study it mirrors.
+the predator–prey **arms race**, **sexual selection**, the loss of costly traits,
+non-adaptive **genetic drift**, and **speciation** — by letting you *be* the
+selection pressure (or the roll of the dice). **Five modes, 120 levels**, every
+level ending with the real-world species and study it mirrors.
 
 The critters walking the path are **prey** carrying genes. The towers you place
 are **selection pressures** (predators and climate). Crucially, every prey that
@@ -32,11 +33,11 @@ python3 -m http.server 8000
 
 It also works as-is on **GitHub Pages** (Settings → Pages → deploy from branch).
 
-## Three modes, one engine
+## Five modes, one engine
 
-All three modes share the same simulation; they differ only in the win condition.
-Each has **30 levels** organized into six themed chapters that introduce a concept
-and ramp the difficulty.
+All five modes share the same simulation; they differ only in the win condition.
+The three core modes have **30 levels** each (six chapters); the two newer modes
+have **15 levels** each (three chapters).
 
 - **🛡️ Extinction** (classic tower defense). Stop the prey before they reach the
   refuge. But survivors breed and adapt to whatever pressure you over-use — that's
@@ -64,6 +65,20 @@ and ramp the difficulty.
   Display → The Handicap Balance → Strong Preference → Coevolution Gauntlet → The
   Cost of Beauty.)*
 
+- **🎲 Genetic drift** (chance, not selection). The counter-point to everything
+  above: here nothing selects on colour, yet a small population *still* evolves. By
+  culling at random (Catastrophes) you shrink the breeding pool until a colour
+  fixes by pure luck — replay and a different one wins. The final chapter flips it:
+  protect **Refuges** to carry a population's diversity through forced bottlenecks.
+  *(Chapters: Lucky Few → Bottleneck → Refuge.)*
+
+- **🧬 Speciation** (one population becomes two). These prey mate with colour-similar
+  partners (assortative mating). Place **Rift** predators that hunt the *middle* of
+  the colour range (disruptive selection); the emptied centre and like-with-like
+  breeding pull the population apart into two separated forms that no longer
+  interbreed — a new species, with no geographic barrier needed.
+  *(Chapters: Disruptive Selection → Reproductive Isolation → Two Species.)*
+
 ## The biology, mapped to mechanics
 
 Each prey has a **genome** of six heritable traits — four survival traits plus the
@@ -77,6 +92,9 @@ for the trait that counters it:
 | 👁️ Visual hunter | **Color** matching the background, and *against* big displays | Camouflage; natural vs. sexual selection |
 | ❄️ Cold snap | — (slows prey, no damage) | The environment as a pressure |
 | 🍂 Scarcity | drains prey burdened by **armor or display** | Costly traits get lost when their benefit is gone |
+| ☄️ Catastrophe | random, **non-selective** death | Shrinks the pool so genetic drift takes over |
+| 🛟 Refuge | passive — re-seeds founding diversity | Protects a small population from drift |
+| 🪓 Rift | hunts the **middle** of the colour range | Disruptive selection that splits a population |
 
 The two sexual-selection genes only come into play in mate-choice levels: a big
 **display** wins matings but slows prey and makes them conspicuous, while
@@ -104,6 +122,12 @@ a line chart of how each trait's average shifts generation over generation.
 - When the predators that once made armor worthwhile are gone, scarcity makes that
   armor pure cost, and the population sheds it — the "use it or lose it" logic
   behind cavefish losing their eyes and horses losing their toes.
+- In drift mode, a small population evolves with **no selection at all** — a colour
+  fixes by sheer chance, and the *outcome is different every replay*. Drift is the
+  null model: not all evolution is adaptation.
+- In speciation mode, disruptive selection plus assortative mating turns a single
+  blob of colour into **two separated forms that no longer interbreed** — you watch
+  one population become two.
 
 ## Scoring, stars & progress
 
@@ -121,7 +145,10 @@ and the matching **real-world case study**, drawn from across the animal kingdom
 You'll meet the peppered moth, Trinidad guppies, long-tailed widowbirds, Darwin's
 finches, rock pocket mice, three-spine sticklebacks, Mexican cavefish, red deer,
 African cichlids, the horse's vanishing toes, why hyenas are cats not dogs,
-tuskless elephants, warfarin-resistant rats, whales, and Tiktaalik.
+tuskless elephants, warfarin-resistant rats, whales, and Tiktaalik — plus the
+genetically near-identical cheetahs and northern elephant seals that came through
+bottlenecks, the colour-blind islanders of Pingelap (a founder effect), and the
+apple maggot fly splitting into two species in real time.
 
 Accuracy is treated as non-negotiable — if the facts were wrong the tool would be
 worse than useless. Each case study carries a **source** to the primary literature
@@ -137,9 +164,9 @@ js/
   genetics.js     traits, heredity, mutation, population stats
   critter.js      an individual organism (movement, defenses, rendering)
   tower.js        selection pressures (trait-dependent damage)
-  levels.js       the 90-level generator (30 per mode, six chapters each)
+  levels.js       the 120-level generator (five modes; drift & speciation too)
   examples.js     the sourced real-world case studies shown in debriefs
-  game.js         the simulation engine (generations, breeding, mate choice, scoring)
+  game.js         the simulation engine (breeding, mate choice, drift, speciation, scoring)
   progress.js     saved stars and chapter unlocks (localStorage)
   ui.js           sidebar panels, live genetics charts, debrief, input (incl. touch)
   main.js         bootstrap that wires the game and UI together
@@ -150,7 +177,7 @@ test/
 ### Tests
 
 ```bash
-node test/balance.mjs   # asserts all 90 levels are structurally valid and beatable
+node test/balance.mjs   # asserts all 120 levels are structurally valid and beatable
 ```
 
 The engine is decoupled from the DOM, so the test drives the real simulation with a
@@ -160,10 +187,11 @@ unbeatable.
 
 ## Roadmap
 
-Possible future directions: a sandbox mode with adjustable parameters,
-frequency-dependent selection (where a trait's value depends on how common it is),
-genetic drift in small populations as its own lesson, and host–parasite
-coevolution as a second kind of arms race.
+Six more teaching modes are specced out as GitHub issues (#3–#8): frequency-
+dependent selection, coevolution / Red Queen (the predators evolve back),
+heterozygote advantage (sickle-cell — needs a diploid genome), mimicry (Batesian &
+Müllerian), artificial selection / domestication, and mass extinction / contingency.
+Genetic drift (#1) and speciation (#2) are now implemented.
 
 ---
 
