@@ -141,14 +141,24 @@ in your browser's `localStorage`.
 
 Evolution here isn't an abstraction — every level ends with a **debrief**: a recap
 of what your population actually did (e.g. *Armor 18% → 54% over 11 generations*)
-and the matching **real-world case study**, drawn from across the animal kingdom.
-You'll meet the peppered moth, Trinidad guppies, long-tailed widowbirds, Darwin's
-finches, rock pocket mice, three-spine sticklebacks, Mexican cavefish, red deer,
-African cichlids, the horse's vanishing toes, why hyenas are cats not dogs,
-tuskless elephants, warfarin-resistant rats, whales, and Tiktaalik — plus the
-genetically near-identical cheetahs and northern elephant seals that came through
-bottlenecks, the colour-blind islanders of Pingelap (a founder effect), and the
-apple maggot fly splitting into two species in real time.
+and the matching **real-world case study**. The library spans **35 cases** from
+right across the tree of life — insects, snails, fish, frogs, reptiles, birds,
+mammals, even a virus — so the examples stay varied as you play, and each chapter
+draws on five different ones. You'll meet the peppered moth, grove snails, Trinidad
+guppies, túngara frogs, stalk-eyed flies, long-tailed widowbirds and peacocks,
+Darwin's finches, rock pocket and beach mice, Timema stick insects, soapberry bugs,
+three-spine sticklebacks, the newt–garter-snake toxin arms race, Australia's
+rabbits and myxoma virus, Caribbean anole radiations, Mexican cavefish, red deer,
+African cichlids, Heliconius butterflies, the horse's vanishing toes, why hyenas
+are cats not dogs, tuskless elephants, warfarin-resistant rats, whales, and
+Tiktaalik — plus the genetically near-identical cheetahs, northern elephant seals
+and California condors that came through bottlenecks, the founder-effect cases of
+Pingelap and the Amish, and the greenish warbler, London Underground mosquito and
+apple maggot fly splitting into new forms in real time.
+
+Where the popular version of a story is shaky, the blurb says so rather than
+oversimplifying — the peacock's eyespots and the Underground mosquito's origin are
+both more contested than the textbook telling, and the text reflects that.
 
 Accuracy is treated as non-negotiable — if the facts were wrong the tool would be
 worse than useless. Each case study carries a **source** to the primary literature

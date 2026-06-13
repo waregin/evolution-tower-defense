@@ -138,6 +138,118 @@ export const EXAMPLES = {
       "The apple maggot fly fed only on hawthorns until apples arrived in North America; by the mid-1800s some flies had switched to apple. Because the flies mate on the fruit they grew up on — and apples ripen earlier than hawthorns — the two 'host races' increasingly breed apart, with no geographic barrier between them. Speciation caught in the act.",
     source: { cite: "Feder, Chilcote & Bush (1988), Nature", url: "https://www.nature.com/articles/336061a0" },
   },
+  cepaea: {
+    taxon: "🐌 Grove snail",
+    concept: "Visual predation & camouflage",
+    blurb:
+      "The grove snail Cepaea nemoralis carries an inherited polymorphism of shell colour and banding. Song thrushes smash snails on stone 'anvils', and Cain & Sheppard found the broken shells under those anvils were biased toward the morphs that stood out against their background — direct evidence of visual selection. Climate (darker shells warm faster) and frequency-dependent predation also help keep several morphs in the population at once.",
+    source: { cite: "Cain & Sheppard (1954), Genetics", url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1209639/" },
+  },
+  beachMouse: {
+    taxon: "🐁 Beach mouse",
+    concept: "Camouflage via pigment genes",
+    blurb:
+      "Oldfield mice living on pale Gulf and Atlantic dune sand have light coats that hide them from owls and herons, while their inland kin are dark. Hoekstra's lab traced the pale coat to two interacting pigment genes — a mutation in Mc1r plus raised Agouti expression — and the light form evolved largely independently on the two coasts, a clean case of parallel adaptation.",
+    source: { cite: "Steiner, Weber & Hoekstra (2007), PLoS Biology", url: "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.0050219" },
+  },
+  timema: {
+    taxon: "🦗 Timema stick insect",
+    concept: "Host-plant camouflage & divergence",
+    blurb:
+      "These wingless stick insects come in colour-pattern morphs camouflaged on different host plants. Bird predation favours whichever form is better hidden on each plant, and adapting to different hosts repeatedly builds partial reproductive isolation between populations — speciation in progress rather than finished, with crypsis only one of several barriers.",
+    source: { cite: "Nosil, Crespi & Sandoval (2002), Nature", url: "https://www.nature.com/articles/417440a" },
+  },
+  newtSnake: {
+    taxon: "🦎 Newt & garter snake",
+    concept: "Toxin–resistance arms race",
+    blurb:
+      "Rough-skinned newts are laced with tetrodotoxin, a potent nerve poison, and the garter snakes that eat them have evolved resistant sodium channels (mutations in NaV1.4). Across the landscape, newt toxicity and snake resistance escalate together in matched hotspots — a geographic mosaic of coevolution — and resistance isn't free: the most resistant snakes crawl more slowly.",
+    source: { cite: "Brodie, Ridenhour & Brodie (2002), Evolution", url: "https://onlinelibrary.wiley.com/doi/10.1111/j.0014-3820.2002.tb00132.x" },
+  },
+  soapberryBug: {
+    taxon: "🪲 Soapberry bug",
+    concept: "Rapid evolution tracking a new host",
+    blurb:
+      "Soapberry bugs pierce fruit with a long 'beak' to reach the seeds inside. When some Florida populations moved onto an introduced flat-podded tree with shallower seeds, their beaks evolved measurably shorter within about 40–50 years — a shift documented from museum specimens, with lab experiments confirming beak length is strongly heritable and can respond fast.",
+    source: { cite: "Carroll & Boyd (1992), Evolution", url: "https://www.jstor.org/stable/2409756" },
+  },
+  myxoma: {
+    taxon: "🐇 Rabbit & myxoma virus",
+    concept: "Virulence–resistance coevolution",
+    blurb:
+      "Myxoma virus, released in Australia in 1950, at first killed over 99% of infected rabbits — but it did not evolve toward harmlessness. It settled at intermediate virulence (strains that kill too fast aren't transmitted by mosquitoes) while the rabbits evolved heritable resistance, and the arms race has since re-escalated. A textbook lesson that 'maximally deadly' is not what a transmitted pathogen evolves toward.",
+    source: { cite: "Kerr et al. (2017), PNAS", url: "https://www.pnas.org/doi/10.1073/pnas.1710336114" },
+  },
+  peacock: {
+    taxon: "🦚 Indian peafowl",
+    concept: "Female choice on an ornament",
+    blurb:
+      "Peacocks fan an iridescent train of eyespots in courtship. When researchers experimentally removed eyespots, males mated less — support for female choice on the ornament. Whether peahens track train size among un-manipulated males is genuinely contested, though: a long-term study found no such correlation, so the experimental evidence is firmer than the observational claim.",
+    source: { cite: "Petrie, Halliday & Sanders (1991), Animal Behaviour", url: "https://doi.org/10.1016/S0003-3472(05)80484-1" },
+  },
+  stalkEyedFly: {
+    taxon: "🪰 Stalk-eyed fly",
+    concept: "Ornament & preference co-evolve",
+    blurb:
+      "Male stalk-eyed flies carry their eyes on long lateral stalks, and females prefer long-eyestalk males. When Wilkinson & Reillo selected on male eye-span for 13 generations, female preference shifted in the same direction — direct evidence of the genetic correlation between ornament and preference that Fisherian runaway selection requires.",
+    source: { cite: "Wilkinson & Reillo (1994), Proc. R. Soc. B", url: "https://royalsocietypublishing.org/doi/10.1098/rspb.1994.0001" },
+  },
+  tungaraFrog: {
+    taxon: "🐸 Túngara frog",
+    concept: "Sexual signal vs eavesdropping predator",
+    blurb:
+      "Male túngara frogs add 'chucks' to their call, and females prefer the more complex version — so elaboration pays in mating. But fringe-lipped bats eavesdrop on those same complex calls and preferentially hunt the most attractive males, a clean natural example of one signal pulled in opposite directions by mate choice and predation.",
+    source: { cite: "Ryan, Tuttle & Rand (1982), The American Naturalist", url: "https://www.journals.uchicago.edu/doi/10.1086/283899" },
+  },
+  barnSwallow: {
+    taxon: "🐦 Barn swallow",
+    concept: "Sexual selection on tail length",
+    blurb:
+      "Male barn swallows trail elongated outer tail streamers. In Møller's classic experiment, males whose streamers were lengthened paired faster and bred more successfully than shortened or control males. The streamer is part flight surface and part ornament, so it carries an aerodynamic cost that plausibly makes it an honest signal of quality.",
+    source: { cite: "Møller (1988), Nature", url: "https://www.nature.com/articles/332640a0" },
+  },
+  anolis: {
+    taxon: "🦎 Caribbean anole lizards",
+    concept: "Replicated adaptive radiation",
+    blurb:
+      "On each of the four Greater Antillean islands, Anolis lizards independently radiated into the same set of habitat specialists — twig, trunk-ground, crown-giant and more — defined by limb length and body size. Same-type 'ecomorphs' on different islands are not close relatives, so similar forms evolved convergently for similar niches: evolution running the same experiment four times.",
+    source: { cite: "Losos et al. (1998), Science", url: "https://www.science.org/doi/10.1126/science.279.5359.2115" },
+  },
+  greenishWarbler: {
+    taxon: "🐦 Greenish warbler",
+    concept: "Ring species around a plateau",
+    blurb:
+      "A chain of greenish-warbler populations rings the treeless Tibetan Plateau. Neighbours interbreed and song changes gradually around the loop, yet where the two ends meet in Siberia the forms behave as separate species that don't interbreed — a near-textbook ring species showing how continuous variation can split into two (later genomics finds the ring has some historical gaps).",
+    source: { cite: "Irwin, Bensch & Price (2001), Nature", url: "https://www.nature.com/articles/35053059" },
+  },
+  undergroundMosquito: {
+    taxon: "🦟 Underground mosquito",
+    concept: "Reproductive isolation underground",
+    blurb:
+      "The 'molestus' mosquito form thriving in the London Underground bites mammals, breeds without a blood meal and stays active all year, unlike the surface form — and crosses between the two are largely infertile, marking strong reproductive isolation. The popular tale that the Tube created it in ~150 years is now doubted: genomics suggests molestus is an older lineage the tunnels merely concentrated.",
+    source: { cite: "Byrne & Nichols (1999), Heredity", url: "https://www.nature.com/articles/6884120" },
+  },
+  heliconius: {
+    taxon: "🦋 Heliconius butterflies",
+    concept: "Mimicry & speciation",
+    blurb:
+      "Distasteful Heliconius butterflies converge on shared bright warning patterns (Müllerian mimicry), so a predator that learns one pattern avoids them all. Those same patterns double as mating cues, so a switch in wing pattern can split a population into non-interbreeding races. A single gene, optix, repeatedly controls the red marks, and useful pattern variants can even pass between species by hybridization.",
+    source: { cite: "Reed et al. (2011), Science", url: "https://www.science.org/doi/10.1126/science.1208227" },
+  },
+  amishEvc: {
+    taxon: "🧬 Amish (Ellis–van Creveld)",
+    concept: "Founder effect in an isolate",
+    blurb:
+      "Ellis–van Creveld syndrome — a recessive dwarfism with extra fingers and heart defects — is rare worldwide but common among the Old Order Amish of Lancaster County, who trace to a small founding group. A pre-existing recessive allele carried by one 18th-century founder couple rode to high frequency by chance in the small, closed population: a founder effect, not new mutation or 'inbreeding causing' the trait.",
+    source: { cite: "Ruiz-Perez et al. (2000), Nature Genetics; founder effect per McKusick (1964)", url: "https://www.nature.com/articles/ng0300_283" },
+  },
+  condor: {
+    taxon: "🦅 California condor",
+    concept: "Bottleneck & conservation genetics",
+    blurb:
+      "The California condor crashed to just 22 birds in the 1980s; every condor alive today descends from about 14 genetic founders. Pedigree-based breeding is used to minimize inbreeding, and the population now tops 500. Ancient DNA shows the wild ancestral population was far more diverse — the bottleneck stripped variation by chance, and careful management is still required.",
+    source: { cite: "D'Elia et al. (2016), The Condor", url: "https://bioone.org/journals/the-condor/volume-118/issue-4/CONDOR-16-35.1/Ancient-DNA-reveals-substantial-genetic-diversity-in-the-California-Condor/10.1650/CONDOR-16-35.1.full" },
+  },
 };
 
 // Resolve an example id to its record (with the id attached).

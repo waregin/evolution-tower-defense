@@ -140,7 +140,7 @@ function buildMode(mode, chapters) {
 // so the map difficulty rises together with d instead of oscillating against it.
 const EXTINCTION = buildMode("extinction", [
   {
-    theme: "Claws", traits: SURV_TRAITS, examples: ["darwinFinch", "pepperedMoth"],
+    theme: "Claws", traits: SURV_TRAITS, examples: ["darwinFinch", "cepaea", "soapberryBug", "beachMouse", "pepperedMoth"],
     lesson: "Selection acts on survivors. If armored prey are the ones escaping your claws, the next generation will be more armored.",
     build: (i, d) => ({
       desc: "Wipe out the prey before they reach the refuge. Whoever escapes breeds — and passes on whatever helped them through.",
@@ -150,7 +150,7 @@ const EXTINCTION = buildMode("extinction", [
     }),
   },
   {
-    theme: "Venom", traits: SURV_TRAITS, examples: ["warfarinRat"],
+    theme: "Venom", traits: SURV_TRAITS, examples: ["warfarinRat", "newtSnake", "myxoma", "soapberryBug", "cepaea"],
     lesson: "A single strong pressure selects for one defense. Diverse pressures stop any one counter-trait from taking over.",
     build: (i, d) => ({
       desc: "Venom is available. Lean too hard on one pressure and the prey evolve a counter to it. Mixing pressures keeps them off balance.",
@@ -160,7 +160,7 @@ const EXTINCTION = buildMode("extinction", [
     }),
   },
   {
-    theme: "The Hunter's Eye", traits: SURV_TRAITS, examples: ["pepperedMoth", "pocketMouse"],
+    theme: "The Hunter's Eye", traits: SURV_TRAITS, examples: ["pepperedMoth", "pocketMouse", "beachMouse", "cepaea", "timema"],
     lesson: "Predators drive prey toward camouflage. That escalation — predator vs. prey defense — is an evolutionary arms race.",
     build: (i, d) => ({
       desc: "A visual hunter joins the fight. It can barely see prey that match the background, so the prey will evolve camouflage to slip past. Pair it with claws — alone it just trains them to hide.",
@@ -170,7 +170,7 @@ const EXTINCTION = buildMode("extinction", [
     }),
   },
   {
-    theme: "Full Arsenal", traits: SURV_TRAITS, examples: ["darwinFinch", "pocketMouse", "warfarinRat", "pepperedMoth", "guppy"],
+    theme: "Full Arsenal", traits: SURV_TRAITS, examples: ["darwinFinch", "anolis", "heliconius", "guppy", "soapberryBug"],
     lesson: "With every counter-trait under selection at once, no single defense saves the prey — but they can't max them all, because armor and display cost speed.",
     build: (i, d) => ({
       desc: "Every pressure is on the table now, and the prey arrive already partly adapted. Combine claws, venom and the hunter to leave no escape.",
@@ -190,7 +190,7 @@ const EXTINCTION = buildMode("extinction", [
     }),
   },
   {
-    theme: "Scarcity", traits: SURV_TRAITS, examples: ["cavefish", "stickleback", "horse"],
+    theme: "Scarcity", traits: SURV_TRAITS, examples: ["cavefish", "stickleback", "horse", "whale", "elephant"],
     lesson: "Scarcity punishes costly armor, so it strikes exactly the prey your claws can't — when a defense becomes a burden, a new pressure exploits it.",
     build: (i, d) => ({
       desc: "Resource scarcity now drains heavily-armored prey. It hits the tough, slow ones your claws struggle with — squeeze the prey between predation and starvation so no body plan is safe.",
@@ -207,7 +207,7 @@ const EXTINCTION = buildMode("extinction", [
 // ---- SURVIVAL (you are the environment; shape the population, keep it alive) -
 const SURVIVAL = buildMode("survival", [
   {
-    theme: "Breed for Green", traits: SURV_TRAITS, examples: ["pocketMouse", "pepperedMoth"],
+    theme: "Breed for Green", traits: SURV_TRAITS, examples: ["pocketMouse", "pepperedMoth", "beachMouse", "cepaea", "timema"],
     lesson: "Directional selection: remove one extreme each generation and the whole population's average shifts — here, toward green.",
     build: (i, d) => ({
       desc: "Now YOU are the environment. Keep the species alive (let the minimum through), and use the visual hunter against the green background so only well-camouflaged green prey survive to breed.",
@@ -220,7 +220,7 @@ const SURVIVAL = buildMode("survival", [
     }),
   },
   {
-    theme: "Build a Tank", traits: SURV_TRAITS, examples: ["warfarinRat", "stickleback"],
+    theme: "Build a Tank", traits: SURV_TRAITS, examples: ["warfarinRat", "stickleback", "newtSnake", "myxoma", "soapberryBug"],
     lesson: "The same logic builds any trait — but selection can only act on variation that already exists, so resistance climbs slowly at first.",
     build: (i, d) => ({
       desc: "Keep the species alive but breed it tough. Cull the weak with venom so only toxin-hardened prey reproduce. Ramp up gradually — too much venom at once collapses the population.",
@@ -233,7 +233,7 @@ const SURVIVAL = buildMode("survival", [
     }),
   },
   {
-    theme: "Forge Armor", traits: SURV_TRAITS, examples: ["darwinFinch", "redDeer"],
+    theme: "Forge Armor", traits: SURV_TRAITS, examples: ["darwinFinch", "redDeer", "stickleback", "anolis", "cepaea"],
     lesson: "Predators are agents of selection: clawed hunters kill the soft-bodied first, so the survivors are better armored. But armor slows prey, and too many claws wipe the soft founders out entirely.",
     build: (i, d) => ({
       desc: "Use clawed predators to cull the lightly-armored. The survivors pass on their plating, so armor climbs generation by generation. Ramp up slowly — a wall of claws annihilates the soft-shelled founders before they can breed.",
@@ -246,7 +246,7 @@ const SURVIVAL = buildMode("survival", [
     }),
   },
   {
-    theme: "Designer Colors", traits: SURV_TRAITS, examples: ["cichlid", "pocketMouse", "pepperedMoth"],
+    theme: "Designer Colors", traits: SURV_TRAITS, examples: ["cichlid", "pocketMouse", "heliconius", "beachMouse", "pepperedMoth"],
     lesson: "Selection toward an unusual target uses the same machinery — and tighter goals demand more careful, sustained pressure.",
     build: (i, d, st, sub) => {
       const hue = [275, 200, 45, 330, 160][sub];
@@ -262,7 +262,7 @@ const SURVIVAL = buildMode("survival", [
     },
   },
   {
-    theme: "Conservation", traits: SURV_TRAITS, examples: ["elephant", "darwinFinch", "whale"],
+    theme: "Conservation", traits: SURV_TRAITS, examples: ["elephant", "condor", "cheetah", "whale", "darwinFinch"],
     lesson: "Small populations and harsh selection are a dangerous mix: push too hard and you cause the very extinction you were trying to prevent.",
     build: (i, d) => ({
       desc: "The hardest shaping of all: a demanding trait target with a thin survival margin. Apply enough pressure to hit the goal, but not so much that the species winks out.",
@@ -275,7 +275,7 @@ const SURVIVAL = buildMode("survival", [
     }),
   },
   {
-    theme: "Use It or Lose It", traits: SURV_TRAITS, examples: ["cavefish", "horse", "stickleback"],
+    theme: "Use It or Lose It", traits: SURV_TRAITS, examples: ["cavefish", "horse", "stickleback", "whale", "elephant"],
     lesson: "A once-useful trait that's now only a cost gets selected away. With the predators gone, heavy armor is pure burden — scarcity strips it back, just like cavefish losing eyes or sticklebacks shedding plates.",
     build: (i, d) => ({
       desc: "These prey inherited heavy armor from an age of predators that's now over. The armor only slows them and costs energy. Use scarcity to make the burden lethal, so the population sheds the plating it no longer needs.",
@@ -293,7 +293,7 @@ const SURVIVAL = buildMode("survival", [
 const HAWK_SPOTS_S = [{ col: 5, row: 5 }, { col: 9, row: 5 }, { col: 8, row: 9 }, { col: 13, row: 9 }];
 const SEXUAL = buildMode("sexual", [
   {
-    theme: "Runaway", traits: SEX_TRAITS, examples: ["widowbird", "cichlid"],
+    theme: "Runaway", traits: SEX_TRAITS, examples: ["widowbird", "peacock", "stalkEyedFly", "barnSwallow", "cichlid"],
     lesson: "Fisherian runaway: choosy maters breed with showy maters, their offspring inherit both the display and the taste for it, and the ornament escalates on its own — once you lift the predators holding it down.",
     build: (i, d, st, sub) => ({
       desc: "These prey choose flashy mates, so the display wants to balloon. But a hunter is already here, picking off the showiest. Sell off that predation (right-click, or the Sell tool) to release the brakes and let runaway carry the display past the target.",
@@ -307,7 +307,7 @@ const SEXUAL = buildMode("sexual", [
     }),
   },
   {
-    theme: "Curb the Display", traits: SEX_TRAITS, examples: ["guppy"],
+    theme: "Curb the Display", traits: SEX_TRAITS, examples: ["guppy", "tungaraFrog", "peacock", "barnSwallow", "redDeer"],
     lesson: "Natural selection can oppose sexual selection. A visual hunter punishes showy prey, so predation pulls the ornament back down — the handicap made lethal. Push too hard, though, and you wipe out the showy population.",
     build: (i, d) => ({
       desc: "Sexual selection has inflated the display. Use the visual hunter — which spots showy prey easily — to make the ornament too costly, dragging it below the target. Don't over-hunt: the prey are mostly showy now, so a wall of hunters collapses the species.",
@@ -320,7 +320,7 @@ const SEXUAL = buildMode("sexual", [
     }),
   },
   {
-    theme: "The Handicap Balance", traits: SEX_TRAITS, examples: ["guppy", "redDeer"],
+    theme: "The Handicap Balance", traits: SEX_TRAITS, examples: ["guppy", "redDeer", "tungaraFrog", "stalkEyedFly", "widowbird"],
     lesson: "At equilibrium the mating benefit of a bigger ornament exactly offsets its survival cost. Tune predation to hold the display steady at that balance point — the handicap principle in action.",
     build: (i, d) => ({
       desc: "Hold the display at a precise middling size. Mate choice keeps pushing it up; your hunters push it down. Find the predation pressure where the two forces balance and the ornament settles into the target window.",
@@ -333,7 +333,7 @@ const SEXUAL = buildMode("sexual", [
     }),
   },
   {
-    theme: "Strong Preference", traits: SEX_TRAITS, examples: ["widowbird", "cichlid"],
+    theme: "Strong Preference", traits: SEX_TRAITS, examples: ["widowbird", "cichlid", "stalkEyedFly", "barnSwallow", "peacock"],
     lesson: "When the taste for showy mates is intense, runaway is powerful — and only heavy, sustained natural selection can hold it in check without dooming the species.",
     build: (i, d) => ({
       desc: "Mate choice here is fierce, so the display rockets upward and resists being pushed down. It takes determined hunting to suppress it to target — but every hunter you add edges the small population closer to collapse. Walk the line.",
@@ -346,7 +346,7 @@ const SEXUAL = buildMode("sexual", [
     }),
   },
   {
-    theme: "Coevolution Gauntlet", traits: SEX_TRAITS, examples: ["guppy", "cichlid", "widowbird"],
+    theme: "Coevolution Gauntlet", traits: SEX_TRAITS, examples: ["guppy", "cichlid", "widowbird", "tungaraFrog", "stalkEyedFly"],
     lesson: "Ornament and preference co-evolve as a linked pair. Steering one means wrestling the whole runaway system — the ultimate test of balancing two selective forces at once.",
     build: (i, d) => ({
       desc: "Everything at once: strong mate choice, pre-adapted prey, tight targets and unforgiving maps. Master the tug-of-war between sexual and natural selection to land the display exactly where it's needed.",
@@ -359,7 +359,7 @@ const SEXUAL = buildMode("sexual", [
     }),
   },
   {
-    theme: "The Cost of Beauty", traits: SEX_TRAITS, examples: ["guppy", "redDeer", "widowbird"],
+    theme: "The Cost of Beauty", traits: SEX_TRAITS, examples: ["guppy", "redDeer", "widowbird", "tungaraFrog", "barnSwallow"],
     lesson: "A showy ornament is costly two ways at once — it draws predators AND drains energy. Both natural-selection forces oppose the runaway, and you can wield either to find the balance.",
     build: (i, d) => ({
       desc: "Now the display is costly two ways: hunters spot it, and scarcity drains the energy it takes to grow. Use predation, starvation, or both to land the ornament in its target window without starving the species out.",
@@ -376,7 +376,7 @@ const SEXUAL = buildMode("sexual", [
 // ---- GENETIC DRIFT (non-adaptive evolution; chance, not selection) ----------
 const DRIFT = buildMode("drift", [
   {
-    theme: "Lucky Few", traits: DRIFT_TRAITS, examples: ["cheetah", "elephantSeal"],
+    theme: "Lucky Few", traits: DRIFT_TRAITS, examples: ["cheetah", "elephantSeal", "condor", "amishEvc", "pingelap"],
     lesson: "With no selection at all, a small population still evolves — allele frequencies drift at random, and a colour can fix purely by luck. Nothing here hunts by colour; only chance decides.",
     build: (i, d) => ({
       desc: "There's no 'best' colour — nothing selects on it. To make the population fix on ONE colour, you must shrink it: cull at random with Catastrophes so only a lucky few breed. Leave too few and they die out; leave too many and drift is too weak.",
@@ -389,7 +389,7 @@ const DRIFT = buildMode("drift", [
     }),
   },
   {
-    theme: "Bottleneck", traits: DRIFT_TRAITS, examples: ["elephantSeal", "pingelap"],
+    theme: "Bottleneck", traits: DRIFT_TRAITS, examples: ["elephantSeal", "pingelap", "condor", "cheetah", "amishEvc"],
     lesson: "The smaller the surviving group, the faster diversity is lost. A population squeezed through a bottleneck emerges genetically uniform — like elephant seals after the sealers.",
     build: (i, d) => ({
       desc: "Bigger, more diverse founders. Squeeze them hard through a Catastrophe bottleneck every generation so a single colour fixes by chance before time runs out.",
@@ -402,7 +402,7 @@ const DRIFT = buildMode("drift", [
     }),
   },
   {
-    theme: "Refuge", traits: DRIFT_TRAITS, examples: ["pingelap", "cheetah"],
+    theme: "Refuge", traits: DRIFT_TRAITS, examples: ["pingelap", "cheetah", "condor", "elephantSeal", "amishEvc"],
     lesson: "Drift is the enemy of diversity. To conserve a small population's variation you must keep effective numbers up — here, by protecting refuges that carry the founding gene pool through each crash.",
     build: (i, d) => ({
       desc: "Now the goal flips: PRESERVE the colour diversity. Forced bottlenecks keep crashing the population and draining variation. Place Refuges — protected reservoirs of the founding diversity — to carry the gene pool through every crash.",
@@ -420,7 +420,7 @@ const DRIFT = buildMode("drift", [
 // ---- SPECIATION (disruptive selection + assortative mating → two forms) ------
 const SPECIATION = buildMode("speciation", [
   {
-    theme: "Disruptive Selection", traits: SPEC_TRAITS, examples: ["rhagoletis", "cichlid"],
+    theme: "Disruptive Selection", traits: SPEC_TRAITS, examples: ["rhagoletis", "cichlid", "heliconius", "timema", "greenishWarbler"],
     lesson: "When the middle of a range is selected against and like mates with like, one population is pulled apart into two — the seed of a new species.",
     build: (i, d) => ({
       desc: "These prey mate with colour-similar partners. Place Rift predators that hunt the MIDDLE colours, emptying the centre so two forms survive at the extremes — and, breeding only with their own kind, stop interbreeding.",
@@ -433,7 +433,7 @@ const SPECIATION = buildMode("speciation", [
     }),
   },
   {
-    theme: "Reproductive Isolation", traits: SPEC_TRAITS, examples: ["rhagoletis", "darwinFinch"],
+    theme: "Reproductive Isolation", traits: SPEC_TRAITS, examples: ["rhagoletis", "undergroundMosquito", "greenishWarbler", "heliconius", "darwinFinch"],
     lesson: "A split only sticks if the two forms stop interbreeding. Assortative mating is that barrier; without it, the extremes blend back into one.",
     build: (i, d) => ({
       desc: "Stronger mate-similarity here. Carve out the middle and hold the two colour forms apart long enough that they're reproductively isolated — two clusters that persist for generations.",
@@ -446,7 +446,7 @@ const SPECIATION = buildMode("speciation", [
     }),
   },
   {
-    theme: "Two Species", traits: SPEC_TRAITS, examples: ["cichlid", "rhagoletis", "darwinFinch"],
+    theme: "Two Species", traits: SPEC_TRAITS, examples: ["cichlid", "rhagoletis", "greenishWarbler", "undergroundMosquito", "anolis"],
     lesson: "Repeated across a lake or a landscape, disruptive selection plus isolation builds whole flocks of species — as in the cichlids of the African Great Lakes.",
     build: (i, d) => ({
       desc: "The full challenge: bigger, tighter populations on hard maps. Split them cleanly into two well-separated, balanced colour species and keep them isolated.",
