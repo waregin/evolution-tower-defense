@@ -250,6 +250,258 @@ export const EXAMPLES = {
       "The California condor crashed to just 22 birds in the 1980s; every condor alive today descends from about 14 genetic founders. Pedigree-based breeding is used to minimize inbreeding, and the population now tops 500. Ancient DNA shows the wild ancestral population was far more diverse — the bottleneck stripped variation by chance, and careful management is still required.",
     source: { cite: "D'Elia et al. (2016), The Condor", url: "https://bioone.org/journals/the-condor/volume-118/issue-4/CONDOR-16-35.1/Ancient-DNA-reveals-substantial-genetic-diversity-in-the-California-Condor/10.1650/CONDOR-16-35.1.full" },
   },
+  deerMouseSandHills: {
+    taxon: "🐁 Sand Hills deer mouse",
+    concept: "Camouflage via a pigment gene",
+    blurb:
+      "On Nebraska's geologically young Sand Hills, deer mice evolved a pale coat that hides them from predators against the light sand. Linnen and Hoekstra traced it to a derived allele of the Agouti pigment gene, favoured by natural selection, that arose after the dunes formed — though the trait is built from several mutations, not the single one the popular telling implies, and gene flow with dark off-dune mice keeps the rest of the genome shared.",
+    source: { cite: "Linnen, Kingsley, Jensen & Hoekstra (2009), Science", url: "https://www.science.org/doi/10.1126/science.1175826" },
+  },
+  whiteSandsLizard: {
+    taxon: "🦎 White Sands lizards",
+    concept: "Convergent blanching, partly via Mc1r",
+    blurb:
+      "On the white gypsum dunes of White Sands, New Mexico, three unrelated lizards independently evolved blanched, sand-matching coats. Two of them — a fence lizard and a whiptail — did so through different mutations in the same pigment gene, Mc1r (even differing in dominance), while the third, the lesser earless lizard, blanched through a separate gene — so the tidy 'all three via Mc1r' story is wrong.",
+    source: { cite: "Rosenblum, Römpler, Schöneberg & Hoekstra (2010), PNAS", url: "https://www.pnas.org/doi/10.1073/pnas.0911042107" },
+  },
+  snowshoeHare: {
+    taxon: "🐇 Snowshoe hare",
+    concept: "Seasonal camouflage & climate mismatch",
+    blurb:
+      "Snowshoe hares moult from brown to white for winter camouflage, but the switch is timed by day length, not snow — so as snow arrives later and melts earlier, white hares are left conspicuous on bare ground. Tracking radio-collared hares, Zimova and Mills measured strong selection against this 'camouflage mismatch'; whether the hares can evolve their moult timing fast enough to keep up is an open question.",
+    source: { cite: "Zimova, Mills & Nowak (2016), Ecology Letters", url: "https://onlinelibrary.wiley.com/doi/10.1111/ele.12568" },
+  },
+  soaySheep: {
+    taxon: "🐑 Soay sheep",
+    concept: "When linkage outvotes selection",
+    blurb:
+      "On the St Kilda islands, feral Soay sheep are mostly dark — a colour set by a single change in the TYRP1 gene and linked to larger body size, which should make dark sheep spread. Yet they are slowly declining: Gratten's team found the dark variant is genetically linked to nearby DNA with the opposite, harmful effect, so selection on the visible coat runs backwards from the naive prediction — a lesson in how linkage can constrain evolution.",
+    source: { cite: "Gratten et al. (2008), Science", url: "https://www.science.org/doi/10.1126/science.1151182" },
+  },
+  ecoliLTEE: {
+    taxon: "🦠 E. coli (Lenski experiment)",
+    concept: "A new ability evolves in the lab",
+    blurb:
+      "In Richard Lenski's long-running experiment, twelve flasks of E. coli have been grown since 1988 — and around generation 31,500 one of them evolved something E. coli normally cannot do: feed on citrate in the presence of oxygen. Blount and Lenski showed the innovation was historically contingent — it only worked because of earlier 'potentiating' mutations unique to that lineage — and traced it to a gene duplication that placed a citrate transporter under a new promoter.",
+    source: { cite: "Blount, Borland & Lenski (2008), PNAS", url: "https://www.pnas.org/doi/10.1073/pnas.0803151105" },
+  },
+  btResistance: {
+    taxon: "🐛 Pink bollworm",
+    concept: "Resistance to insecticidal Bt crops",
+    blurb:
+      "Pink bollworm, a cotton pest, evolved resistance to the Bt toxin engineered into transgenic cotton, through mutations that disrupt a midgut cadherin protein the toxin must bind to in order to kill. Tellingly, the outcome differed by region — practical resistance in India but, with refuge strategies that preserve susceptible insects, sustained control or even eradication elsewhere — showing resistance is a management outcome, not an inevitability.",
+    source: { cite: "Fabrick et al. (2014), PLOS ONE", url: "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0097900" },
+  },
+  glyphosateWeed: {
+    taxon: "🌿 Palmer amaranth",
+    concept: "Herbicide resistance by gene copies",
+    blurb:
+      "Palmer amaranth, a fast-growing farm weed, defeated glyphosate (Roundup) by massively amplifying EPSPS — the very gene encoding the herbicide's target enzyme. Gaines found resistant plants carry tens to over a hundred extra copies, making so much enzyme the herbicide cannot shut the pathway down; the surplus copies even ride on self-replicating circular DNA that spreads quickly through a population.",
+    source: { cite: "Gaines et al. (2010), PNAS", url: "https://www.pnas.org/doi/10.1073/pnas.0906649107" },
+  },
+  malariaResistance: {
+    taxon: "🦟 Malaria parasite",
+    concept: "Drug resistance under treatment",
+    blurb:
+      "The malaria parasite Plasmodium falciparum evolved partial resistance to artemisinin, the frontline drug, through mutations in its kelch13 gene. Ariey's team pinned down the marker by combining lab selection with parasites from treated patients; here 'resistance' means the parasite is cleared more slowly rather than the drug failing outright, and the genetic marker now powers global surveillance as resistant lineages spread.",
+    source: { cite: "Ariey et al. (2014), Nature", url: "https://www.nature.com/articles/nature12876" },
+  },
+  kingsnakeMimicry: {
+    taxon: "🐍 Scarlet kingsnake",
+    concept: "Batesian mimicry of a venomous model",
+    blurb:
+      "The harmless scarlet kingsnake copies the red-black-yellow banding of the venomous coral snake. Pfennig showed the disguise only pays where the model lives: clay replica snakes were attacked far more often by wild predators in areas without coral snakes than where the real venomous snake shares the range — a mimicry that protects only as far as local predators have learned to fear the original.",
+    source: { cite: "Pfennig, Harcombe & Pfennig (2001), Nature", url: "https://www.nature.com/articles/35066628" },
+  },
+  cuckooHost: {
+    taxon: "🐦 Cuckoo & reed warbler",
+    concept: "Egg-mimicry vs egg-rejection arms race",
+    blurb:
+      "The common cuckoo lays eggs that mimic its host's, while hosts such as the reed warbler evolve to spot and eject foreign eggs — a coevolutionary arms race. Davies and Brooke found warblers reject badly-matched eggs far more often than good mimics, the selection that drives cuckoo mimicry; with host-specific cuckoo lineages and host defences that vary from place to place, it is an ongoing, geographically patchy race rather than a finished one.",
+    source: { cite: "Davies & Brooke (1988), Animal Behaviour", url: "https://doi.org/10.1016/S0003-3472(88)80269-0" },
+  },
+  daphniaDefense: {
+    taxon: "🦐 Water flea (Daphnia)",
+    concept: "Predator-induced defences",
+    blurb:
+      "Young water fleas grow protective 'neckteeth' only when they smell chemical cues from their predator, the phantom-midge larva — an inducible defence built just in time and dropped when the threat passes. The predator cannot easily stop betraying itself, because the trigger cues are by-products of its own digestion.",
+    source: { cite: "Tollrian (1993), Journal of Plankton Research", url: "https://doi.org/10.1093/plankt/15.11.1309" },
+  },
+  crossbill: {
+    taxon: "🐦 Red crossbill & lodgepole pine",
+    concept: "Bill–cone coevolution",
+    blurb:
+      "Red crossbills pry seeds from conifer cones with their crossed bill tips, and where their main competitor the red squirrel is absent, lodgepole pines evolve tougher, better-defended cones while the crossbills evolve larger bills in response — a reciprocal arms race. Where squirrels are present, the pines adapt to them instead and crossbills are scarce: a textbook 'geographic mosaic' of coevolution.",
+    source: { cite: "Benkman et al. (2003), The American Naturalist", url: "https://doi.org/10.1086/376580" },
+  },
+  olm: {
+    taxon: "🦎 Olm",
+    concept: "Cave eyes and pigment lost",
+    blurb:
+      "The olm, a cave salamander of Europe's Dinaric karst, is blind and ghost-pale: its eyes begin forming in the embryo, then stop and sink beneath the skin — regression that is genetically programmed, not a mere failure to develop. Its enormous genome is only now being sequenced, so the exact genes behind the eye loss are not yet known.",
+    source: { cite: "Kos et al. (2001), Cell and Tissue Research", url: "https://pubmed.ncbi.nlm.nih.gov/11236001/" },
+  },
+  flightlessCormorant: {
+    taxon: "🐦 Flightless cormorant",
+    concept: "Wings lost on the Galápagos",
+    blurb:
+      "The Galápagos flightless cormorant has stubby, useless wings. Burga's genome study found the key changes concentrated in genes that, when broken in people, cause skeletal dwarfisms — especially CUX1, already tied to short wings in chickens — suggesting limb-development genes shrank the wing bones. A later comment disputed parts of the analysis, but the CUX1 result held up.",
+    source: { cite: "Burga et al. (2017), Science", url: "https://www.science.org/doi/10.1126/science.aal3345" },
+  },
+  vitaminCLoss: {
+    taxon: "🦧 Vitamin C loss",
+    concept: "The same ability lost twice",
+    blurb:
+      "Most mammals make their own vitamin C, but dry-nosed primates (including us) and guinea pigs cannot, because the gene GULO is broken in each. It happened independently: the primate and guinea-pig copies are disabled at different spots, so these are two separate losses rather than a shared inheritance — which is why we have to get vitamin C from our diet.",
+    source: { cite: "Nishikimi et al. (1994), Journal of Biological Chemistry", url: "https://www.jbc.org/article/S0021-9258(17)36876-9/fulltext" },
+  },
+  nakedMoleRat: {
+    taxon: "🐭 Naked mole-rat",
+    concept: "Vision regressed underground",
+    blurb:
+      "The naked mole-rat spends its whole life in lightless tunnels and has tiny, near-useless eyes. Its genome is littered with inactivated 'pseudogene' versions of vision and retina genes — the same kind of loss seen independently in the unrelated blind mole-rat — a signature of relaxed selection on sight in the dark.",
+    source: { cite: "Zhao et al. (2022), BMC Biology", url: "https://bmcbiol.biomedcentral.com/articles/10.1186/s12915-022-01243-0" },
+  },
+  silversword: {
+    taxon: "🌿 Hawaiian silverswords",
+    concept: "One ancestor, an explosion of forms",
+    blurb:
+      "Around 30 Hawaiian species — silver desert rosettes, shrubs, trees, vines and mats — all descend from a single colonisation by Californian 'tarweed' plants, after a hybrid, genome-doubled ancestor radiated across the islands' habitats. It is a textbook case of one lucky disperser seeding an entire ecological radiation.",
+    source: { cite: "Barrier et al. (1999), Molecular Biology and Evolution", url: "https://academic.oup.com/mbe/article/16/8/1105/2925504" },
+  },
+  honeycreeper: {
+    taxon: "🐦 Hawaiian honeycreepers",
+    concept: "Bill radiation from a finch",
+    blurb:
+      "Hawaii's honeycreepers evolved a riot of bill shapes — nectar-sipping curves, seed-crushing cones, woodpecker-like probes — all from a single finch ancestor. DNA places them right beside the plain-billed Eurasian rosefinches, confirming the elaborate diversity arose within Hawaii over the last 5–6 million years as the high islands rose.",
+    source: { cite: "Lerner et al. (2011), Current Biology", url: "https://www.cell.com/current-biology/fulltext/S0960-9822(11)01078-5" },
+  },
+  marsupialConvergence: {
+    taxon: "🐺 Thylacine & wolf",
+    concept: "Convergent predator skulls",
+    blurb:
+      "The extinct marsupial thylacine — the 'Tasmanian tiger' — and the placental wolf evolved remarkably similar skulls despite some 160 million years on separate branches, shaped by the same predatory way of life. The resemblance is not total: the thylacine's bite was weaker, so it likely took smaller prey — a reminder that convergence copies the broad form, not every detail.",
+    source: { cite: "Newton et al. (2021), Communications Biology", url: "https://www.nature.com/articles/s42003-020-01569-x" },
+  },
+  echolocationConvergence: {
+    taxon: "🦇 Bats & dolphins (echolocation)",
+    concept: "Same gene recruited twice",
+    blurb:
+      "Echolocating bats and toothed whales evolved their biological sonar independently — yet partly with the same molecular changes: the hearing protein Prestin carries convergent mutations that misleadingly group these distant animals together on a gene tree. Broader claims of genome-wide convergence are contested, but the Prestin result is solid.",
+    source: { cite: "Liu et al. (2010), Current Biology", url: "https://www.cell.com/current-biology/fulltext/S0960-9822(09)02073-9" },
+  },
+  antifreezeFish: {
+    taxon: "🐟 Polar fish antifreeze",
+    concept: "A protein invented twice",
+    blurb:
+      "Antarctic icefish and northern cod survive sub-zero seas using nearly identical antifreeze proteins — but they built them independently. In the Antarctic fish the antifreeze gene was repurposed from a digestive-enzyme gene; the cod's version shares no such ancestry, so two separate genetic origins converged on almost the same molecule.",
+    source: { cite: "Chen, DeVries & Cheng (1997), PNAS", url: "https://www.pnas.org/doi/10.1073/pnas.94.8.3817" },
+  },
+  octopusEye: {
+    taxon: "🐙 Octopus eye",
+    concept: "Camera eyes, evolved separately",
+    blurb:
+      "Octopuses and vertebrates both have camera eyes with a lens and retina, yet their common ancestor had nothing of the sort — they evolved the design separately. Both use the shared master gene Pax6 to build an eye, but the octopus retina is wired the 'right way out', with no blind spot, so the resemblance is convergence, not a copied blueprint.",
+    source: { cite: "Ogura, Ikeo & Gojobori (2004), Genome Research", url: "https://genome.cshlp.org/content/14/8/1555.full" },
+  },
+  tibetanAltitude: {
+    taxon: "🏔️ Tibetan highlanders",
+    concept: "Altitude adaptation from archaic DNA",
+    blurb:
+      "Tibetans thrive above 4,000 m partly thanks to a variant of EPAS1, a gene governing the body's response to low oxygen, which spares them the thick, risky blood that lowlanders make at altitude. Huerta-Sánchez showed this helpful variant was inherited from the Denisovans, an archaic human group — adaptive DNA borrowed through ancient interbreeding.",
+    source: { cite: "Huerta-Sánchez et al. (2014), Nature", url: "https://www.nature.com/articles/nature13408" },
+  },
+  kiwiWing: {
+    taxon: "🥝 Kiwi",
+    concept: "Flight and colour vision lost",
+    blurb:
+      "New Zealand's kiwi gave up flight — its wings are vestigial nubs — and went nocturnal, trading sight for smell. Its genome carries broken genes for blue- and green-light vision (so kiwi are effectively colour-blind) alongside an expanded set of smell-receptor genes, changes that fit a life lived in the dark.",
+    source: { cite: "Le Duc et al. (2015), Genome Biology", url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4511969/" },
+  },
+  sageGrouse: {
+    taxon: "🐦 Greater sage-grouse",
+    concept: "Lek mating & female choice",
+    blurb:
+      "On traditional display grounds called leks, male sage-grouse puff their chest sacs and strut, and a few top males win most of the matings. Work by Wiley and by Gibson found success tracks display performance — but also female faithfulness to particular sites and the copying of other females' choices, so the 'choice' here is layered rather than one clean preference.",
+    source: { cite: "Gibson, Bradbury & Vehrencamp (1991), Behavioral Ecology", url: "https://academic.oup.com/beheco/article-abstract/2/2/165/267757" },
+  },
+  birdOfParadise: {
+    taxon: "🐦 Birds of paradise",
+    concept: "Female choice sculpts male display",
+    blurb:
+      "New Guinea's roughly 40 birds of paradise are a showcase of sexual selection: males evolved outrageous plumage, colour and choreographed dances. Comparing species, Ligon found that a bird's colours, sounds and movements have evolved together as a package — consistent with females favouring the whole performance, looks and moves alike.",
+    source: { cite: "Ligon et al. (2018), PLOS Biology", url: "https://doi.org/10.1371/journal.pbio.2006962" },
+  },
+  satinBowerbird: {
+    taxon: "🪺 Satin bowerbird",
+    concept: "Courtship by decorated bower",
+    blurb:
+      "Male satin bowerbirds build and decorate stick 'bowers' — courtship stages, not nests — and favour blue trinkets to lure females. Borgia's field experiments showed mating success is highly skewed and tracks bower quality and decoration, so the bower advertises the male; his later work found display vigour matters too.",
+    source: { cite: "Borgia (1985), Animal Behaviour", url: "https://www.sciencedirect.com/science/article/abs/pii/S0003347285801408" },
+  },
+  swordtailSword: {
+    taxon: "🐟 Swordtail fish",
+    concept: "A taste that predates the trait",
+    blurb:
+      "Female swordtails prefer males with a long sword-like fin extension — and Basolo found that females of a swordless relative also preferred males given an artificial sword, suggesting the preference existed before the ornament itself (a 'sensory bias'). The interpretation is debated, though: the preference may simply be for larger-looking males.",
+    source: { cite: "Basolo (1990), Science", url: "https://www.science.org/doi/10.1126/science.250.4982.808" },
+  },
+  flatwingCricket: {
+    taxon: "🦗 Pacific field cricket",
+    concept: "A mating song lost in a few years",
+    blurb:
+      "On Kauai, a 'flatwing' mutation that silences male crickets — erasing the structures they rub to chirp — swept to most of the males in fewer than 20 generations. The driver is a parasitoid fly that homes in on the song to plant deadly larvae, so silence means survival; the mute males get by with sneaky satellite tactics near the few that still sing.",
+    source: { cite: "Zuk, Rotenberry & Tinghitella (2006), Biology Letters", url: "https://doi.org/10.1098/rsbl.2006.0539" },
+  },
+  dungBeetleHorns: {
+    taxon: "🪲 Horned dung beetle",
+    concept: "Costly weapons trade off",
+    blurb:
+      "Male Onthophagus dung beetles grow exaggerated horns to fight over tunnels — and Emlen showed the horns are paid for elsewhere on the body, trading off against nearby structures such as the eyes during development. Large males grow horns and fight; small males skip them and sneak matings instead — though the size of the trade-off varies with conditions.",
+    source: { cite: "Emlen (2001), Science", url: "https://doi.org/10.1126/science.1056607" },
+  },
+  przewalskiHorse: {
+    taxon: "🐎 Przewalski's horse",
+    concept: "Bottleneck & conservation breeding",
+    blurb:
+      "Every Przewalski's horse alive descends from roughly a dozen founders caught around a century ago. Careful studbook breeding rebuilt the species past 2,000 animals, but its genome still shows reduced diversity and inbreeding — and in 2020 one was cloned from decades-old frozen cells to put some lost variation back.",
+    source: { cite: "Der Sarkissian et al. (2015), Current Biology", url: "https://www.sciencedirect.com/science/article/pii/S0960982215010039" },
+  },
+  floridaPanther: {
+    taxon: "🐆 Florida panther",
+    concept: "Inbreeding rescued by gene flow",
+    blurb:
+      "By the 1990s the few remaining Florida panthers carried tell-tale inbreeding defects — kinked tails, heart holes. Managers released eight female Texas pumas to restore gene flow; the population tripled, heterozygosity doubled, and the defects faded in cats born afterward — a textbook 'genetic rescue', even though habitat loss still limits the cats.",
+    source: { cite: "Johnson et al. (2010), Science", url: "https://www.science.org/doi/10.1126/science.1192891" },
+  },
+  mauritiusKestrel: {
+    taxon: "🦅 Mauritius kestrel",
+    concept: "Through the eye of the needle",
+    blurb:
+      "The Mauritius kestrel fell to about four wild birds in 1974 before captive breeding rebuilt it to hundreds of pairs. Comparing century-old museum skins with living birds, Groombridge showed the species was once as genetically diverse as mainland kestrels but now keeps only a fraction — a conservation triumph that still bears the bottleneck's lasting mark.",
+    source: { cite: "Groombridge, Jones, Bruford & Nichols (2000), Nature", url: "https://www.nature.com/articles/35001148" },
+  },
+  mimulus: {
+    taxon: "🌸 Monkeyflowers",
+    concept: "One gene flips the pollinator",
+    blurb:
+      "Pink, bee-pollinated Mimulus lewisii and red, hummingbird-pollinated M. cardinalis are kept apart mainly by which pollinator visits them. Bradshaw and Schemske swapped the allele at a single flower-colour gene and the visits flipped dramatically — bees and hummingbirds switching their attention — showing one mutation can start a pollinator shift, even if full isolation takes many genes.",
+    source: { cite: "Bradshaw & Schemske (2003), Nature", url: "https://doi.org/10.1038/nature02106" },
+  },
+  sticklebackPair: {
+    taxon: "🐟 Stickleback species pairs",
+    concept: "Ecological speciation in lakes",
+    blurb:
+      "In a handful of young British Columbia lakes, threespine sticklebacks split — again and again — into a chunky bottom-feeding form and a slender open-water form, each shaped for its niche and breeding mostly with its own kind. It is a model of ecological speciation; tellingly, one pair collapsed back into a hybrid swarm after an introduced crayfish muddied its lake, showing how fragile a young species can be.",
+    source: { cite: "Schluter & McPhail (1992), The American Naturalist", url: "https://www.journals.uchicago.edu/doi/10.1086/285404" },
+  },
+  howeaPalm: {
+    taxon: "🌴 Kentia palms",
+    concept: "Speciation without a barrier (debated)",
+    blurb:
+      "The two Howea palms of tiny, remote Lord Howe Island are sister species that, Savolainen argued, split in place — diverging by soil preference and flowering time rather than any geographic barrier — a leading plant case for sympatric speciation. It is genuinely contested: critics note a now-sunken neighbouring island cannot be ruled out, so treat the 'no barrier' claim as strong but disputed.",
+    source: { cite: "Savolainen et al. (2006), Nature", url: "https://doi.org/10.1038/nature04566" },
+  },
 };
 
 // Resolve an example id to its record (with the id attached).
